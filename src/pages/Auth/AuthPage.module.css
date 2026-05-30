@@ -14,8 +14,6 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 2.5rem;
-  position: relative;
-  overflow: hidden;
 }
 
 .leftPanel::before {
@@ -56,18 +54,38 @@
   color: #c9a96e;
 }
 
-.leftContent {
+/* New container for sliding banners */
+.bannerContainer {
   z-index: 1;
   position: relative;
+  overflow: hidden; 
+  width: 100%;
+  height: 100%; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  padding-top: 40px; 
+}
+
+.bannerWrapper {
+  display: flex;
+  width: fit-content; 
+  height: 100%;
+  transition: transform 0.8s ease-in-out; /* Smooth sliding transition */
+}
+
+.bannerItem {
+  flex-shrink: 0; /* Prevent items from shrinking */
+  width: 100%; /* Each item takes full width of the container */
 }
 
 .tagline {
   font-family: 'Playfair Display', serif;
-  font-size: 36px;
+  font-size: 42px; 
   line-height: 1.2;
   color: #f5f0e8;
   font-weight: 400;
-  margin-bottom: 1rem;
+  margin-bottom: 1.2rem;
 }
 
 .tagline em {
@@ -76,10 +94,10 @@
 }
 
 .subText {
-  font-size: 14px;
+  font-size: 16px; 
   color: rgba(245, 240, 232, 0.5);
   line-height: 1.6;
-  max-width: 260px;
+  max-width: 320px;
 }
 
 .dots {
@@ -257,26 +275,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   transition: background 0.2s;
 }
 
 .btnGoogle:hover {
   background: #f7f7f7;
-}
-
-.googleG {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: conic-gradient(
-    #4285f4 0 90deg,
-    #ea4335 90deg 180deg,
-    #fbbc05 180deg 270deg,
-    #34a853 270deg
-  );
-  display: inline-block;
-  flex-shrink: 0;
 }
 
 /* ── Misc ── */
@@ -343,11 +346,31 @@
     padding: 2rem;
   }
 
-  .tagline {
-    font-size: 26px;
+.bannerItem .tagline {
+    font-size: 32px; /* Tăng kích thước trên mobile */
+  }
+
+  .bannerItem .tagline em {
+    font-style: italic;
+    color: #c9a96e;
+  }
+
+  .bannerItem .subText {
+    font-size: 15px; /* Tăng kích thước trên mobile */
+    color: rgba(245, 240, 232, 0.5);
+    line-height: 1.6;
+    max-width: 280px;
   }
 
   .rightPanel {
     padding: 2rem 1.5rem;
   }
+}
+
+/* ── Error Message ── */
+.errorMessage {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
 }

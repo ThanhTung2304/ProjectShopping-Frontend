@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "./AuthPage.module.css";
 import { useNavigate } from "react-router-dom";
 
@@ -52,6 +52,10 @@ const handleLogin = async (e) => {
     showToast("Vui lòng nhập đầy đủ thông tin");
     return;
   }
+  if (registerForm.password.length < 6) {
+    showToast("Mật khẩu phải có ít nhất 6 ký tự");
+    return;
+  }
   try {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
       method: "POST",
@@ -73,29 +77,98 @@ const handleLogin = async (e) => {
   }
 };
 
+  // New state for banner carousel
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const banners = [
+    {
+      tagline: (
+        <>
+          Thời trang <em>định nghĩa</em>
+          <br />
+          phong cách của bạn
+        </>
+      ),
+      subText: "Khám phá bộ sưu tập thời trang cao cấp — từ minimalist đến street style.",
+    },
+    {
+      tagline: (
+        <>
+          Nâng tầm phong cách
+          <br />
+          với những thiết kế độc đáo
+        </>
+      ),
+      subText: "Sự kết hợp hoàn hảo giữa hiện đại và cổ điển.",
+    },
+    {
+      tagline: (
+        <>
+          Tự tin tỏa sáng
+          <br />
+          mọi lúc mọi nơi
+        </>
+      ),
+      subText: "Thời trang không chỉ là quần áo, mà còn là cá tính.",
+    },
+  ];
+  const bannerRef = useRef(null);
+
+  // Auto-slide effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % banners.length);
+    }, 5000); // Change banner every 5 seconds
+    return () => clearInterval(interval);
+  }, [banners.length]);
+
+  // Manual slide effect when dot is clicked
+  const handleDotClick = (index) => {
+    setCurrentBannerIndex(index);
+  };
+
+  // Update transform when currentBannerIndex changes
+  useEffect(() => {
+    if (bannerRef.current) {
+      bannerRef.current.style.transform = `translateX(-${currentBannerIndex * 100}%)`;
+    }
+  }, [currentBannerIndex]);
+
   return (
     <div className={styles.root}>
       {/* ── Left Panel ── */}
       <div className={styles.leftPanel}>
         <div className={styles.brandLogo}>
-          LA <span>Studio</span>
+
+          {/* Hiển thị tên thương hiệu với "LeAnh" là phần chính và "Studio" là phần phụ, có thể được thiết kế nhỏ hơn hoặc khác màu để tạo điểm nhấn. */}
+          LeAnh <span>Studio</span>     
+          
         </div>
 
-        <div className={styles.leftContent}>
-          <h1 className={styles.tagline}>
-            Thời trang <em>định nghĩa</em>
-            <br />
-            phong cách của bạn
-          </h1>
-          <p className={styles.subText}>
-            Khám phá bộ sưu tập thời trang cao cấp — từ minimalist đến street style.
-          </p>
+        <div className={styles.bannerContainer}>
+          <div className={styles.bannerWrapper} ref={bannerRef}>
+            {banners.map((banner, index) => (
+              <div key={index} className={styles.bannerItem}>
+                <h1 className={styles.tagline}>
+                  {banner.tagline}
+                </h1>
+                <p className={styles.subText}>
+                  {banner.subText}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className={styles.dots}>
-          <span className={`${styles.dot} ${styles.dotActive}`} />
-          <span className={styles.dot} />
-          <span className={styles.dot} />
+          {banners.map((_, index) => (
+            <span
+              key={index}
+              className={`${styles.dot} ${
+                currentBannerIndex === index ? styles.dotActive : ""
+              }`}
+              onClick={() => setCurrentBannerIndex(index)}
+            />
+          ))}
         </div>
       </div>
 
@@ -131,7 +204,7 @@ const handleLogin = async (e) => {
                 <input
                   type="email"
                   className={styles.formInput}
-                  placeholder="name@example.com"
+                  placeholder=""
                   value={loginForm.email}
                   onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                 />
@@ -142,7 +215,7 @@ const handleLogin = async (e) => {
                 <input
                   type="password"
                   className={styles.formInput}
-                  placeholder="••••••••"
+                  placeholder=""
                   value={loginForm.password}
                   onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                 />
@@ -161,7 +234,6 @@ const handleLogin = async (e) => {
               </div>
 
               <button type="button" className={styles.btnGoogle}>
-                <span className={styles.googleG} />
                 Tiếp tục với Google
               </button>
 
@@ -180,7 +252,7 @@ const handleLogin = async (e) => {
                 <input
                   type="text"
                   className={styles.formInput}
-                  placeholder="Nguyễn Văn A"
+                  placeholder=""
                   value={registerForm.fullName}
                   onChange={(e) => setRegisterForm({ ...registerForm, fullName: e.target.value })}
                 />
@@ -191,7 +263,7 @@ const handleLogin = async (e) => {
                 <input
                   type="email"
                   className={styles.formInput}
-                  placeholder="name@example.com"
+                  placeholder=""
                   value={registerForm.email}
                   onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
                 />
@@ -202,7 +274,7 @@ const handleLogin = async (e) => {
                 <input
                   type="tel"
                   className={styles.formInput}
-                  placeholder="0912 345 678"
+                  placeholder=""
                   value={registerForm.phone}
                   onChange={(e) => setRegisterForm({ ...registerForm, phone: e.target.value })}
                 />
@@ -213,10 +285,15 @@ const handleLogin = async (e) => {
                 <input
                   type="password"
                   className={styles.formInput}
-                  placeholder="Tối thiểu 8 ký tự"
+                  placeholder="Ít nhất 6 ký tự"
                   value={registerForm.password}
                   onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
                 />
+                {registerForm.password.length > 0 && registerForm.password.length < 6 && (
+                  <span className={styles.errorMessage}>
+                    Mật khẩu phải có ít nhất 6 ký tự
+                  </span>
+                )}
               </div>
 
               <button type="submit" className={styles.btnPrimary}>
