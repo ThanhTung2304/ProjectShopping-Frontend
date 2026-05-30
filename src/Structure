@@ -1,0 +1,72 @@
+src
+│
+├── assets
+│    ├── images
+│    └── icons
+│
+├── components
+│    │
+│    ├── Navbar
+│    │     ├── Navbar.jsx
+│    │     └── Navbar.module.css
+│    │
+│    ├── ProductCard
+│    │     ├── ProductCard.jsx
+│    │     └── ProductCard.module.css
+│    │
+│    ├── HeroSection
+│    │     ├── HeroSection.jsx
+│    │     └── HeroSection.module.css
+│    │
+│    └── Sidebar
+│          ├── Sidebar.jsx
+│          └── Sidebar.module.css
+│
+├── pages
+│    │
+│    ├── AuthPage
+│    │     ├── AuthPage.jsx
+│    │     └── AuthPage.module.css
+│    │
+│    ├── HomePage
+│    │     ├── HomePage.jsx
+│    │     └── HomePage.module.css
+│    │
+│    ├── ProductPage
+│    │     ├── ProductPage.jsx
+│    │     └── ProductPage.module.css
+│    │
+│    ├── CollectionPage
+│    │     ├── CollectionPage.jsx
+│    │     └── CollectionPage.module.css
+│    │
+│    ├── ProductDetailPage
+│    │     ├── ProductDetailPage.jsx
+│    │     └── ProductDetailPage.module.css
+│    │
+│    ├── CartPage
+│    │     ├── CartPage.jsx
+│    │     └── CartPage.module.css
+│    │
+│    └── ProfilePage
+│          ├── ProfilePage.jsx
+│          └── ProfilePage.module.css
+│
+├── services
+│    │
+│    ├── authService.js
+│    ├── productService.js
+│    └── cartService.js
+│
+├── utils
+│    │
+│    ├── formatPrice.js
+│    └── storage.js
+│
+├── routes
+│    └── AppRoutes.jsx
+│
+├── App.jsx
+├── main.jsx
+├── index.css
+└── .env
