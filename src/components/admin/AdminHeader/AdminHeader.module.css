@@ -1,0 +1,56 @@
+.header {
+  height: 70px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.current { color: #000; font-weight: 500; }
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.userInfo { text-align: right; }
+
+.name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.role {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.divider {
+  width: 1px;
+  height: 30px;
+  background: #eee;
+}
+
+.logoutBtn {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: #ff4d4f;
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s;
+}
+.logoutBtn:hover { transform: scale(1.1); }

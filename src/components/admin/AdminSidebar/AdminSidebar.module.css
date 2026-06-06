@@ -1,0 +1,77 @@
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background-color: #000;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  left: 0;
+}
+
+.logoSection {
+  padding: 30px 25px;
+  border-bottom: 1px solid #222;
+}
+
+.logo {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 2px;
+  font-size: 1.1rem;
+}
+
+.logo span { font-weight: 300; color: #888; }
+
+.nav {
+  flex: 1;
+  padding: 30px 15px;
+}
+
+.sectionTitle {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #555;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+  padding-left: 10px;
+}
+
+.menuList { list-style: none; }
+
+.menuLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  color: #aaa;
+  text-decoration: none;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  transition: all 0.3s;
+  margin-bottom: 5px;
+}
+
+.menuLink i { font-size: 1.2rem; }
+
+.menuLink:hover, .active {
+  background-color: #222;
+  color: #fff;
+}
+
+.active { border-left: 3px solid #fff; border-radius: 0 4px 4px 0; }
+
+.sidebarFooter {
+  padding: 20px;
+  border-top: 1px solid #222;
+}
+
+.supportCard {
+  background: #111;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.8rem;
+}

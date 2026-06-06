@@ -1,72 +1,243 @@
-src
+// fashionshop-fe/
+// ├── .env                  # File chứa biến môi trường (VITE_API_URL=http://localhost:8080)
+// ├── .env.example          # File mẫu để push lên github
+// ├── index.html
+// ├── package.json
+// ├── vite.config.js
+// └── src/
+//     ├── main.jsx          # File entry point, nơi bọc các Provider (Auth, Theme...)
+//     ├── App.jsx           # Component gốc, gọi Router chính của ứng dụng
+//     │
+//     ├── api/              # LAYER 1: QUẢN LÝ API (Gọi xuống Backend)
+//     │   ├── axiosClient.js# Cấu hình Axios (BaseURL, Interceptors đính kèm Token)
+//     │   ├── authApi.js    # API Đăng nhập, đăng ký, lấy thông tin cá nhân
+//     │   ├── productApi.js # API lấy danh sách, chi tiết sản phẩm, bộ lọc
+//     │   ├── cartApi.js    # API thêm/sửa/xóa sản phẩm trong giỏ hàng
+//     │   └── orderApi.js   # API đặt hàng, lịch sử đơn hàng
+//     │
+//     ├── assets/           # TÀI NGUYÊN TĨNH
+//     │   ├── images/       # Logo, banner, ảnh tĩnh của hệ thống
+//     │   └── styles/       # CSS toàn cục (global.css, variables.css nếu có)
+//     │
+//     ├── components/       # REUSABLE COMPONENTS (Component dùng chung ở nhiều trang)
+//     │   ├── common/       # UI Components nhỏ, độc lập
+//     │   │   ├── Button/   # Button custom theo design hệ thống
+//     │   │   ├── Input/    # Các ô nhập liệu có validation chung
+//     │   │   ├── Toast/    # Bộ thông báo pop-up
+//     │   │   └── Loading/  # Hiệu ứng chờ khi tải dữ liệu
+//     │   │
+//     │   ├── client/       # Component dùng chung riêng cho phía Khách hàng
+//     │   │   ├── Header/   # Thanh menu trên cùng (Tìm kiếm, Giỏ hàng, User)
+//     │   │   ├── Footer/   # Chân trang thông tin liên hệ
+//     │   │   └── ProductCard/# Ô hiển thị nhanh sản phẩm (Ảnh, Tên, Giá, Nút mua)
+//     │   │
+//     │   └── admin/        # Component dùng chung riêng cho phía Quản trị
+//     │       ├── AdminSidebar/ # Thanh điều hướng bên trái của Admin
+//     │       └── AdminHeader/  # Thanh topbar của Admin
+//     │
+//     ├── context/          # LAYER 2: GLOBAL STATE (Quản lý trạng thái toàn cục)
+//     │   ├── AuthContext.jsx # Quản lý trạng thái Đăng nhập, Token, và Profile User
+//     │   └── CartContext.jsx # Quản lý số lượng sản phẩm trong giỏ hàng (hiển thị ở Badge Header)
+//     │
+//     ├── hooks/            # CUSTOM HOOKS (Tái sử dụng logic xử lý)
+//     │   ├── useAuth.js    # Hook viết gọn để lấy dữ liệu từ AuthContext nhanh hơn
+//     │   └── useCart.js    # Hook viết gọn để xử lý nhanh các hành động thêm/xóa giỏ hàng
+//     │
+//     ├── layouts/          # LAYOUTS (Khung bao bọc các trang)
+//     │   ├── CustomerLayout.jsx # Chứa [Header + Outlet + Footer] cho các trang mua sắm
+//     │   └── AdminLayout.jsx    # Chứa [Sidebar + AdminHeader + Outlet] cho các trang quản lý
+//     │
+//     ├── pages/            # LAYER 3: PAGES (Giao diện chính của từng trang)
+//     │   ├── auth/         # Phân hệ Đăng nhập / Đăng ký
+//     │   │   ├── AuthPage.jsx
+//     │   │   └── AuthPage.module.css
+//     │   │
+//     │   ├── client/       # Phân hệ Khách hàng (Nằm trong CustomerLayout)
+//     │   │   ├── HomePage/ # Trang chủ (Banner carousel, danh mục, sản phẩm hot)
+//     │   │   ├── ProductListPage/# Trang danh sách sản phẩm (Có sidebar lọc giá, size)
+//     │   │   ├── ProductDetailPage/# Trang chi tiết sản phẩm (Chọn size, color, số lượng)
+//     │   │   ├── CartPage/ # Trang giỏ hàng (Cập nhật số lượng, bấm thanh toán)
+//     │   │   └── CheckoutPage/# Trang điền địa chỉ, chọn PTTT và Đặt hàng
+//     │   │
+//     │   └── admin/        # Phân hệ Quản trị (Nằm trong AdminLayout)
+//     │       ├── DashboardPage/ # Trang thống kê doanh thu, biểu đồ
+//     │       ├── ProductMgmtPage/# Trang quản lý sản phẩm (Bảng danh sách, nút Thêm/Sửa/Xóa)
+//     │       └── OrderMgmtPage/ # Trang duyệt đơn hàng, cập nhật trạng thái vận chuyển
+//     │
+//     └── router/           # LAYER 4: ROUTING & PHÂN QUYỀN
+//         ├── index.jsx     # Cấu hình tất cả các đường dẫn (Routes) trong App
+//         ├── GuardRoute.jsx# Bảo vệ: Chưa đăng nhập thì đá về /auth
+//         └── AdminRoute.jsx# Bảo vệ: Đăng nhập rồi nhưng không phải ADMIN thì đá ra ngoài
+
+
+
+src/
 │
-├── assets
-│    ├── images
-│    └── icons
+├── api/
+│   ├── axiosClient.js
+│   ├── authApi.js
+│   ├── productApi.js
+│   ├── cartApi.js
+│   ├── orderApi.js
+│   ├── userApi.js
+│   └── categoryApi.js
 │
-├── components
-│    │
-│    ├── Navbar
-│    │     ├── Navbar.jsx
-│    │     └── Navbar.module.css
-│    │
-│    ├── ProductCard
-│    │     ├── ProductCard.jsx
-│    │     └── ProductCard.module.css
-│    │
-│    ├── HeroSection
-│    │     ├── HeroSection.jsx
-│    │     └── HeroSection.module.css
-│    │
-│    └── Sidebar
-│          ├── Sidebar.jsx
-│          └── Sidebar.module.css
+├── assets/
+│   ├── images/
+│   │   ├── logo.png
+│   │   ├── banner1.jpg
+│   │   └── default-product.jpg
+│   │
+│   ├── icons/
+│   │   ├── cart.svg
+│   │   ├── user.svg
+│   │   └── search.svg
+│   │
+│   └── styles/
+│       ├── variables.css
+│       ├── reset.css
+│       └── global.css
 │
-├── pages
-│    │
-│    ├── AuthPage
-│    │     ├── AuthPage.jsx
-│    │     └── AuthPage.module.css
-│    │
-│    ├── HomePage
-│    │     ├── HomePage.jsx
-│    │     └── HomePage.module.css
-│    │
-│    ├── ProductPage
-│    │     ├── ProductPage.jsx
-│    │     └── ProductPage.module.css
-│    │
-│    ├── CollectionPage
-│    │     ├── CollectionPage.jsx
-│    │     └── CollectionPage.module.css
-│    │
-│    ├── ProductDetailPage
-│    │     ├── ProductDetailPage.jsx
-│    │     └── ProductDetailPage.module.css
-│    │
-│    ├── CartPage
-│    │     ├── CartPage.jsx
-│    │     └── CartPage.module.css
-│    │
-│    └── ProfilePage
-│          ├── ProfilePage.jsx
-│          └── ProfilePage.module.css
+├── components/
+│   │
+│   ├── common/
+│   │   ├── Button/
+│   │   │   ├── Button.jsx
+│   │   │   └── Button.module.css
+│   │   │
+│   │   ├── Input/
+│   │   │   ├── Input.jsx
+│   │   │   └── Input.module.css
+│   │   │
+│   │   ├── Modal/
+│   │   │   ├── Modal.jsx
+│   │   │   └── Modal.module.css
+│   │   │
+│   │   ├── Loading/
+│   │   │   ├── Loading.jsx
+│   │   │   └── Loading.module.css
+│   │   │
+│   │   ├── Pagination/
+│   │   │   ├── Pagination.jsx
+│   │   │   └── Pagination.module.css
+│   │   │
+│   │   └── Toast/
+│   │       ├── Toast.jsx
+│   │       └── Toast.module.css
+│   │
+│   ├── client/
+│   │   ├── Header/
+│   │   │   ├── Header.jsx
+│   │   │   └── Header.module.css
+│   │   │
+│   │   ├── Footer/
+│   │   │   ├── Footer.jsx
+│   │   │   └── Footer.module.css
+│   │   │
+│   │   ├── ProductCard/
+│   │   │   ├── ProductCard.jsx
+│   │   │   └── ProductCard.module.css
+│   │   │
+│   │   ├── ProductGrid/
+│   │   │   ├── ProductGrid.jsx
+│   │   │   └── ProductGrid.module.css
+│   │   │
+│   │   ├── FilterSidebar/
+│   │   │   ├── FilterSidebar.jsx
+│   │   │   └── FilterSidebar.module.css
+│   │   │
+│   │   └── SearchBar/
+│   │       ├── SearchBar.jsx
+│   │       └── SearchBar.module.css
+│   │
+│   └── admin/
+│       ├── AdminSidebar/
+│       │   ├── AdminSidebar.jsx
+│       │   └── AdminSidebar.module.css
+│       │
+│       ├── AdminHeader/
+│       │   ├── AdminHeader.jsx
+│       │   └── AdminHeader.module.css
+│       │
+│       └── DashboardCard/
+│           ├── DashboardCard.jsx
+│           └── DashboardCard.module.css
 │
-├── services
-│    │
-│    ├── authService.js
-│    ├── productService.js
-│    └── cartService.js
+├── contexts/
+│   ├── AuthContext.jsx
+│   ├── CartContext.jsx
+│   └── ThemeContext.jsx
 │
-├── utils
-│    │
-│    ├── formatPrice.js
-│    └── storage.js
+├── hooks/
+│   ├── useAuth.js
+│   ├── useCart.js
+│   └── useTheme.js
 │
-├── routes
-│    └── AppRoutes.jsx
+├── layouts/
+│   ├── CustomerLayout/
+│   │   └── CustomerLayout.jsx
+│   │
+│   └── AdminLayout/
+│       └── AdminLayout.jsx
+│
+├── pages/
+│   │
+│   ├── auth/
+│   │   ├── LoginPage.jsx
+│   │   └── RegisterPage.jsx
+│   │
+│   ├── client/
+│   │   ├── HomePage/
+│   │   │   ├── HomePage.jsx
+│   │   │   └── HomePage.module.css
+│   │   │
+│   │   ├── ProductListPage/
+│   │   │   ├── ProductListPage.jsx
+│   │   │   └── ProductListPage.module.css
+│   │   │
+│   │   ├── ProductDetailPage/
+│   │   │   ├── ProductDetailPage.jsx
+│   │   │   └── ProductDetailPage.module.css
+│   │   │
+│   │   ├── CartPage/
+│   │   │   ├── CartPage.jsx
+│   │   │   └── CartPage.module.css
+│   │   │
+│   │   └── CheckoutPage/
+│   │       ├── CheckoutPage.jsx
+│   │       └── CheckoutPage.module.css
+│   │
+│   └── admin/
+│       ├── DashboardPage/
+│       │   └── DashboardPage.jsx
+│       │
+│       ├── ProductMgmtPage/
+│       │   └── ProductMgmtPage.jsx
+│       │
+│       ├── OrderMgmtPage/
+│       │   └── OrderMgmtPage.jsx
+│       │
+│       ├── UserMgmtPage/
+│       │   └── UserMgmtPage.jsx
+│       │
+│       └── InventoryPage/
+│           └── InventoryPage.jsx
+│
+├── routes/
+│   ├── index.jsx
+│   ├── GuardRoute.jsx
+│   └── AdminRoute.jsx
+│
+├── utils/
+│   ├── formatCurrency.js
+│   ├── formatDate.js
+│   ├── storage.js
+│   └── validator.js
+│
+├── constants/
+│   ├── apiEndpoints.js
+│   ├── roles.js
+│   └── routes.js
 │
 ├── App.jsx
-├── main.jsx
-├── index.css
-└── .env
+└── main.jsx

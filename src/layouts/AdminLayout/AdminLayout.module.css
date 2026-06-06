@@ -1,0 +1,17 @@
+.adminWrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f4f7f6;
+  font-family: "DM Sans", sans-serif;
+}
+
+.rightSide {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mainContent {
+  padding: 30px;
+  flex: 1;
+}

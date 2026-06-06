@@ -1,0 +1,43 @@
+.container { max-width: 1400px; margin: 0 auto; padding: 60px 40px; display: grid; grid-template-columns: 240px 1fr; gap: 50px; }
+
+.sidebar { position: sticky; top: 120px; height: fit-content; }
+.filterSection h3 { font-size: 0.85rem; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 700; color: #111; }
+.catList { list-style: none; padding: 0; }
+.catItem { font-size: 0.9rem; color: #666; margin-bottom: 12px; cursor: pointer; transition: 0.2s; text-transform: capitalize; }
+.catItem:hover { color: #000; padding-left: 5px; }
+.activeCat { color: #c9a96e !important; font-weight: 600; }
+
+.topBar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.count { font-size: 0.9rem; color: #888; }
+.count span { color: #111; font-weight: 600; }
+.sort { font-size: 0.9rem; color: #666; display: flex; align-items: center; gap: 10px; }
+.sort select { border: none; font-weight: 600; outline: none; cursor: pointer; background: transparent; }
+
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+.card { cursor: pointer; transition: transform 0.3s; }
+.imageBox { position: relative; aspect-ratio: 3/4; overflow: hidden; background: #f9f9f9; }
+.imageBox img { width: 100%; height: 100%; object-fit: cover; transition: scale 0.6s; }
+.card:hover img { scale: 1.05; }
+.overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; color: #fff; opacity: 0; transition: 0.3s; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1.5px; font-weight: 600; backdrop-filter: blur(2px); }
+.card:hover .overlay { opacity: 1; }
+.info { padding: 15px 0; }
+.info h3 { font-size: 1rem; font-weight: 500; margin-bottom: 5px; }
+.info p { color: #c9a96e; font-weight: 700; }
+
+.loading, .error, .noProducts {
+  text-align: center;
+  padding: 50px 0;
+  font-size: 1.1rem;
+  color: #666;
+}
+.error { color: #ff4d4f; }
+.resetFilter {
+  display: inline-block;
+  margin-top: 20px;
+  color: #c9a96e;
+}
+@media (max-width: 1024px) { 
+  .container { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .grid { grid-template-columns: repeat(2, 1fr); } 
+}

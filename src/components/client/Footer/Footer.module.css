@@ -1,0 +1,91 @@
+.footer {
+  background-color: #111;
+  color: #fff;
+  padding: 48px 0 24px;
+  margin-top: auto;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.newsletter {
+  text-align: center;
+}
+
+.newsletter h3 {
+  font-size: 14px;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.newsletter p {
+  color: #aaa;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.inputBox {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.inputBox input {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid #444;
+  background: #222;
+  color: #fff;
+  outline: none;
+  font-size: 14px;
+}
+
+.inputBox button {
+  padding: 10px 20px;
+  background: #fff;
+  color: #111;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.linksRow {
+  display: flex;
+  gap: 48px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.col h4 {
+  font-size: 12px;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+  color: #fff;
+}
+
+.col a {
+  color: #aaa;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.col a:hover {
+  color: #fff;
+}
