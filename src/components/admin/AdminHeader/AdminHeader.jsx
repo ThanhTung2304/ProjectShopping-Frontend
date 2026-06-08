@@ -1,11 +1,20 @@
 import { useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/authContextValue";
 import styles from "./AdminHeader.module.css";
+
+const titleByPath = {
+  "/admin/dashboard": "Bảng điều khiển",
+  "/admin/products": "Sản phẩm",
+  "/admin/orders": "Đơn hàng",
+  "/admin/users": "Khách hàng",
+  "/admin/inventory": "Kho hàng",
+};
 
 export default function AdminHeader() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -16,8 +25,8 @@ export default function AdminHeader() {
     <header className={styles.header}>
       <div className={styles.breadcrumb}>
         <span>Trang quản trị</span>
-        <i className="ri-arrow-right-s-line"></i>
-        <span className={styles.current}>Bảng điều khiển</span>
+        <span>/</span>
+        <span className={styles.current}>{titleByPath[location.pathname] || "Admin"}</span>
       </div>
 
       <div className={styles.actions}>
@@ -25,11 +34,11 @@ export default function AdminHeader() {
           <p className={styles.name}>{user?.fullName || "Admin"}</p>
           <span className={styles.role}>Quản trị viên</span>
         </div>
-        
+
         <div className={styles.divider}></div>
 
-        <button onClick={handleLogout} className={styles.logoutBtn} title="Đăng xuất">
-          <i className="ri-logout-box-r-line"></i>
+        <button onClick={handleLogout} className={styles.logoutBtn} title="Đăng xuất" type="button">
+          Đăng xuất
         </button>
       </div>
     </header>

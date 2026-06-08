@@ -254,3 +254,52 @@
 .noProducts {
   font-style: italic;
 }
+
+/* Polish */
+.shopBtn,
+.seeAllBtn,
+.quickAdd {
+  font-weight: 700;
+}
+
+.shopBtn {
+  letter-spacing: 0.6px;
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.14);
+  transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.shopBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 45px rgba(0, 0, 0, 0.18);
+}
+
+.shopBtn:active {
+  transform: translateY(-1px);
+}
+
+.seeAllBtn {
+  background: #fff;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.seeAllBtn:hover {
+  border-color: #111;
+  transform: translateY(-2px);
+}
+
+.card {
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: opacity 0.6s var(--ease-smooth), transform 0.6s var(--ease-smooth), box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-soft);
+}
+
+.quickAdd {
+  transition: bottom 0.3s var(--ease-smooth), opacity 0.3s ease, background 0.2s ease;
+}
+
+.quickAdd:hover {
+  background: #111;
+}

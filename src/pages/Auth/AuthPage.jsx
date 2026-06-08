@@ -3,6 +3,7 @@ import styles from "./AuthPage.module.css";
 import { useNavigate } from "react-router-dom";
 import authApi from "../../api/authApi";
 import { AuthContext } from "../../context/authContextValue";
+import { buildAuthUser, isAdminUser } from "../../utils/authUtils";
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -35,9 +36,10 @@ const handleLogin = async (e) => {
     if (!res.success) throw new Error(res.message || "Sai email hoặc mật khẩu");
     
     localStorage.setItem("token", res.data.token);
-    setAuthUser(res.data.user);
+    const loggedInUser = buildAuthUser(res.data);
+    setAuthUser(loggedInUser);
     showToast("Đăng nhập thành công ✓");
-    setTimeout(() => navigate("/home"), 800);
+    setTimeout(() => navigate(isAdminUser(loggedInUser) ? "/admin/dashboard" : "/"), 800);
   } catch (err) {
     showToast(err.message);
   }
@@ -62,9 +64,10 @@ const handleLogin = async (e) => {
     });
     if (!res.success) throw new Error(res.message || "Đăng ký thất bại");
     localStorage.setItem("token", res.data.token);
-    if (res.data.user) setAuthUser(res.data.user);
+    const registeredUser = buildAuthUser(res.data);
+    if (registeredUser) setAuthUser(registeredUser);
     showToast("Đăng ký thành công! ✓");
-    setTimeout(() => navigate("/home"), 800);
+    setTimeout(() => navigate(isAdminUser(registeredUser) ? "/admin/dashboard" : "/"), 800);
   } catch (err) {
     showToast(err.message);
   }

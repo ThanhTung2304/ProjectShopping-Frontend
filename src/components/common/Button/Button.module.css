@@ -5,8 +5,9 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
   border: none;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -20,6 +21,8 @@
 
 .primary:hover {
   background-color: #333;
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-2px);
 }
 
 .outline {
@@ -31,6 +34,7 @@
 .outline:hover {
   background-color: #000;
   color: #fff;
+  transform: translateY(-2px);
 }
 
 .btn:disabled {

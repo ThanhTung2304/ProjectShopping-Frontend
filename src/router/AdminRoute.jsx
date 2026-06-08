@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { Navigate } from "react-router-dom";
 import { AuthContext } from "../context/authContextValue";
+import { isAdminUser } from "../utils/authUtils";
 
 export default function AdminRoute({ children }) {
   const { user, isAuthenticated, loading } = useContext(AuthContext);
@@ -15,7 +16,7 @@ export default function AdminRoute({ children }) {
     return <Navigate to="/auth" replace />;
   }
 
-  if (user.role !== "admin") {
+  if (!isAdminUser(user)) {
     // Người dùng đã đăng nhập nhưng không phải admin, chuyển hướng về trang chủ
     return <Navigate to="/home" replace />;
   }

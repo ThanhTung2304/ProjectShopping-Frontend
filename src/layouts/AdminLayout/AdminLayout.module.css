@@ -1,14 +1,15 @@
-.adminWrapper {
+.adminContainer {
   display: flex;
   min-height: 100vh;
-  background-color: #f4f7f6;
+  background-color: #f6f6f4;
   font-family: "DM Sans", sans-serif;
 }
 
-.rightSide {
+.adminBody {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .mainContent {

@@ -103,3 +103,50 @@
 
 @media (max-width: 992px) { .cartWrapper { grid-template-columns: 1fr; } .summary { order: -1; } }
 @media (max-width: 600px) { .tableHead { display: none; } .cartItem { grid-template-columns: 1fr; gap: 20px; } .itemTotal { text-align: left; } }
+
+/* Polish */
+.productInfo img {
+  border-radius: 8px;
+}
+
+.qtyPicker {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.qtyPicker button {
+  background: #fff;
+  transition: background 0.2s ease;
+}
+
+.qtyPicker button:hover {
+  background: #f5f5f5;
+}
+
+.summaryCard {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.04);
+}
+
+.checkoutBtn {
+  border-radius: 8px;
+  font-weight: 700;
+  transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.checkoutBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
+.continueBtn {
+  border-radius: 999px;
+  font-weight: 700;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.continueBtn:hover {
+  background: #333;
+  transform: translateY(-2px);
+}

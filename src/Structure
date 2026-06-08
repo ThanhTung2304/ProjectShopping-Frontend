@@ -75,11 +75,14 @@ src/
 │
 ├── api/
 │   ├── axiosClient.js
+│   ├── addressApi.js
 │   ├── authApi.js
 │   ├── productApi.js
 │   ├── cartApi.js
 │   ├── orderApi.js
 │   ├── userApi.js
+│   ├── productApi.js
+│   ├── reviewApi.js
 │   └── categoryApi.js
 │
 ├── assets/
@@ -220,7 +223,7 @@ src/
 │       ├── UserMgmtPage/
 │       │   └── UserMgmtPage.jsx
 │       │
-│       └── InventoryPage/
+│       └── UserMgmtPage/
 │           └── InventoryPage.jsx
 │
 ├── routes/

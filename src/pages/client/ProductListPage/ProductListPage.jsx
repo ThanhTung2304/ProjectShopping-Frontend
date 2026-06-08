@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import styles from "./ProductListPage.module.css";
-import productApi from "../../../api/productApi"; // Import API service
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import productApi from "../../../api/productApi";
 import {
   formatCurrency,
   getProductId,
@@ -10,14 +9,7 @@ import {
   getProductPrice,
   getResponseList,
 } from "../../../utils/productUtils";
-
-const CATEGORIES = [
-  { id: "all", label: "Tất cả" },
-  { id: "jacket", label: "Áo khoác" },
-  { id: "dress", label: "Váy" },
-  { id: "pants", label: "Quần" },
-  { id: "top", label: "Áo sơ mi" },
-];
+import styles from "./ProductListPage.module.css";
 
 export default function ProductListPage() {
   const navigate = useNavigate();
@@ -26,25 +18,25 @@ export default function ProductListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const currentCategory = searchParams.get("category") || "all"; // Lấy category từ URL
-  const currentSort = searchParams.get("sort") || "newest"; // Lấy sort từ URL
+  const currentCategory = searchParams.get("category") || "all";
+  const currentSort = searchParams.get("sort") || "newest";
 
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       setError(null);
+
       try {
-        const params = {
+        const response = await productApi.getAll({
           category: currentCategory === "all" ? undefined : currentCategory,
           sort: currentSort,
-        };
-        const response = await productApi.getAll(params);
-
+        });
         const data = getResponseList(response);
+
         if (Array.isArray(data)) {
           setProducts(data);
         } else {
-          setError(response.message || "Không thể tải sản phẩm.");
+          setError(response?.message || "Không thể tải sản phẩm.");
         }
       } catch (err) {
         setError("Đã xảy ra lỗi khi tải sản phẩm.");
@@ -54,12 +46,8 @@ export default function ProductListPage() {
       }
     };
 
-    fetchProducts();
-  }, [currentCategory, currentSort]); // Re-fetch khi category hoặc sort thay đổi
-
-  const handleCategoryChange = (catId) => {
-    setSearchParams({ category: catId, sort: currentSort });
-  };
+    void fetchProducts();
+  }, [currentCategory, currentSort]);
 
   const handleSortChange = (e) => {
     setSearchParams({ category: currentCategory, sort: e.target.value });
@@ -67,28 +55,11 @@ export default function ProductListPage() {
 
   return (
     <div className={styles.container}>
-      {/* Sidebar Filters */}
-      <aside className={styles.sidebar}>
-        <div className={styles.filterSection}>
-          <h3>DANH MỤC</h3>
-          <ul className={styles.catList}>
-            {CATEGORIES.map(cat => (
-              <li 
-                key={cat.id} 
-                className={`${styles.catItem} ${currentCategory === cat.id ? styles.activeCat : ""}`}
-                onClick={() => handleCategoryChange(cat.id)}
-              >
-                {cat.label}
-              </li>
-            ))}
-          </ul>
-          {/* Thêm các bộ lọc khác như giá, màu sắc, thương hiệu ở đây */}
-        </div>
-      </aside>
-
       <div className={styles.content}>
         <div className={styles.topBar}>
-          <p className={styles.count}>Hiển thị <span>{products.length}</span> sản phẩm</p>
+          <p className={styles.count}>
+            Hiển thị <span>{products.length}</span> sản phẩm
+          </p>
           <div className={styles.sort}>
             <span>Sắp xếp theo:</span>
             <select value={currentSort} onChange={handleSortChange}>
@@ -105,30 +76,31 @@ export default function ProductListPage() {
         {!loading && !error && products.length === 0 && (
           <div className={styles.noProducts}>
             <p>Không tìm thấy sản phẩm nào.</p>
-            <Link to="/products" className={styles.resetFilter}>Xóa bộ lọc</Link>
+            <Link to="/products" className={styles.resetFilter}>
+              Xóa bộ lọc
+            </Link>
           </div>
         )}
 
         {!loading && !error && products.length > 0 && (
           <div className={styles.grid}>
-            {products.map((p) => (
-            <div 
-              key={getProductId(p)}
-              className={styles.card}
-              onClick={() => navigate(`/products/${getProductPathId(p)}`)}
-            >
-              <div className={styles.imageBox}>
-                {/* Fallback cho cả img và image */}
-                <img src={getProductImage(p)} alt={p.name} />
-                <div className={styles.overlay}>Xem chi tiết</div>
+            {products.map((product) => (
+              <div
+                key={getProductId(product)}
+                className={styles.card}
+                onClick={() => navigate(`/products/${getProductPathId(product)}`)}
+              >
+                <div className={styles.imageBox}>
+                  <img src={getProductImage(product)} alt={product.name} />
+                  <div className={styles.overlay}>Xem chi tiết</div>
+                </div>
+                <div className={styles.info}>
+                  <h3>{product.name}</h3>
+                  <p>{formatCurrency(getProductPrice(product))}</p>
+                </div>
               </div>
-              <div className={styles.info}>
-                <h3>{p.name}</h3>
-                <p>{formatCurrency(getProductPrice(p))}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

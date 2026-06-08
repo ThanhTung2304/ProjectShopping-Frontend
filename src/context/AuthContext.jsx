@@ -1,38 +1,7 @@
 import { useEffect, useState } from 'react';
 import userApi from '../api/userApi';
+import { buildAuthUser, getTokenUser } from '../utils/authUtils';
 import { AuthContext } from './authContextValue';
-
-const decodeTokenPayload = (token) => {
-  try {
-    const [, payload] = token.split('.');
-    if (!payload) return null;
-
-    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
-    const json = decodeURIComponent(
-      atob(normalizedPayload)
-        .split('')
-        .map((char) => `%${char.charCodeAt(0).toString(16).padStart(2, '0')}`)
-        .join(''),
-    );
-
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
-};
-
-const getTokenUser = () => {
-  const token = localStorage.getItem('token');
-  if (!token) return null;
-
-  const payload = decodeTokenPayload(token);
-  return {
-    id: payload?.id || payload?.userId || payload?.sub || 'authenticated-user',
-    email: payload?.email || payload?.sub || '',
-    fullName: payload?.fullName || payload?.name || payload?.sub || 'Tài khoản',
-    role: payload?.role || payload?.authorities?.[0]?.authority || payload?.authorities?.[0] || 'customer',
-  };
-};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => getTokenUser());
@@ -42,12 +11,17 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    userApi.getProfile()
+    userApi.getMe()
       .then((res) => {
-        if (res.success && res.data) setUser(res.data);
+        if (res.success && res.data) setUser(buildAuthUser(res.data));
       })
-      .catch(() => {
-        setUser((currentUser) => currentUser || getTokenUser());
+      .catch(async () => {
+        try {
+          const res = await userApi.getProfile();
+          if (res.success && res.data) setUser(buildAuthUser(res.data));
+        } catch {
+          setUser((currentUser) => currentUser || getTokenUser());
+        }
       })
       .finally(() => setLoading(false));
   }, []);

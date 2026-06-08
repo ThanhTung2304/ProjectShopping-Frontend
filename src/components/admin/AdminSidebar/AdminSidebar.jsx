@@ -1,4 +1,4 @@
-import { NavLink, Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import styles from "./AdminSidebar.module.css";
 
 export default function AdminSidebar() {
@@ -13,7 +13,7 @@ export default function AdminSidebar() {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.logoSection}>
-        <Link to="/home" className={styles.logo}>
+        <Link to="/admin/dashboard" className={styles.logo}>
           LEANH <span>ADMIN</span>
         </Link>
       </div>
@@ -23,11 +23,9 @@ export default function AdminSidebar() {
         <ul className={styles.menuList}>
           {menuItems.map((item) => (
             <li key={item.path}>
-              <NavLink 
-                to={item.path} 
-                className={({ isActive }) => 
-                  `${styles.menuLink} ${isActive ? styles.active : ""}`
-                }
+              <NavLink
+                to={item.path}
+                className={({ isActive }) => `${styles.menuLink} ${isActive ? styles.active : ""}`}
               >
                 <i className={item.icon}></i>
                 <span>{item.label}</span>

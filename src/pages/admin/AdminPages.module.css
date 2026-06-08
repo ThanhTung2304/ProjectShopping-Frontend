@@ -1,0 +1,276 @@
+.page {
+  display: grid;
+  gap: 24px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #8c8c8c;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
+.pageHeader h1 {
+  margin: 0;
+  color: #111;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.pageHeader p {
+  margin: 10px 0 0;
+  color: #666;
+}
+
+.primaryBtn {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.primaryBtn:hover {
+  background: #333;
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-2px);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.statCard,
+.panel,
+.tableCard {
+  border: 1px solid #e9e9e9;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.04);
+}
+
+.statCard {
+  padding: 20px;
+}
+
+.statLabel {
+  margin: 0 0 10px;
+  color: #777;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.statValue {
+  margin: 0;
+  color: #111;
+  font-size: 1.8rem;
+  font-weight: 900;
+}
+
+.statHint {
+  display: block;
+  margin-top: 8px;
+  color: #999;
+  font-size: 0.82rem;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 20px;
+}
+
+.panel {
+  padding: 22px;
+}
+
+.panel h2,
+.tableCard h2 {
+  margin: 0 0 18px;
+  color: #111;
+  font-size: 1.1rem;
+}
+
+.tableCard {
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 22px;
+  border-bottom: 1px solid #eee;
+}
+
+.searchInput {
+  min-height: 40px;
+  width: min(280px, 100%);
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  padding: 0 12px;
+  outline: none;
+}
+
+.searchInput:focus {
+  border-color: #c9a96e;
+  box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.16);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 15px 18px;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.table th {
+  color: #777;
+  background: #fbfbfb;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.table td {
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.nameCell {
+  color: #111;
+  font-weight: 800;
+}
+
+.muted {
+  color: #888;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #f4f4f4;
+  color: #555;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.statusSuccess {
+  background: #eaf8ef;
+  color: #237a42;
+}
+
+.statusWarn {
+  background: #fff5dd;
+  color: #9a6a00;
+}
+
+.statusDanger {
+  background: #ffecec;
+  color: #b42318;
+}
+
+.actionRow {
+  display: flex;
+  gap: 8px;
+}
+
+.ghostBtn {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #e1e1e1;
+  border-radius: 7px;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.ghostBtn:hover {
+  border-color: #111;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.listItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.listItem:last-child {
+  border-bottom: 0;
+}
+
+.empty,
+.error,
+.loading {
+  padding: 28px;
+  color: #777;
+  text-align: center;
+}
+
+.error {
+  color: #d92d20;
+}
+
+@media (max-width: 1100px) {
+  .statsGrid,
+  .contentGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .pageHeader,
+  .tableHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .statsGrid,
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+}
