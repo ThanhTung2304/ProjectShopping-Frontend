@@ -1,0 +1,305 @@
+.root {
+  min-height: 100vh;
+  background: #f8f8f8;
+  font-family: "DM Sans", sans-serif;
+}
+
+/* ================= HERO ================= */
+
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 90px 60px;
+  gap: 70px;
+}
+
+.subtitle {
+  color: #c9a96e;
+  letter-spacing: 3px;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.heroContent h1 {
+  font-size: 68px;
+  line-height: 1.08;
+  color: #111;
+  margin-bottom: 26px;
+  font-family: "Playfair Display", serif;
+  font-weight: 600;
+}
+
+.desc {
+  color: #666;
+  line-height: 1.8;
+  max-width: 520px;
+  margin-bottom: 36px;
+  font-size: 15px;
+}
+
+.shopBtn {
+  background: #111;
+  color: white;
+  border: none;
+  border-radius: 40px; /* Bo tròn hoàn toàn dạng pill */
+  padding: 15px 32px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.shopBtn:hover {
+  background: #222;
+  transform: translateY(-2px);
+}
+
+.heroImage img {
+  width: 100%;
+  height: 720px;
+  object-fit: cover;
+  border-radius: 40px; /* Mềm mại hơn */
+  box-shadow: 0 30px 60px rgba(0,0,0,0.06); /* Bóng đổ nhẹ và sâu hơn */
+}
+
+/* ================= FEATURED PRODUCTS ================= */
+
+.products {
+  padding: 20px 60px 100px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 42px;
+}
+
+.sectionHeader h2 {
+  font-size: 40px;
+  color: #111;
+  font-family: "Playfair Display", serif;
+  margin: 0;
+}
+
+.seeAllBtn {
+  background: none;
+  border: 1px solid #ddd; /* Giảm độ đậm của viền */
+  border-radius: 30px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+
+.seeAllBtn:hover {
+  background: #111;
+  color: white;
+}
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+}
+
+.card {
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.3s ease;
+}
+
+.card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+}
+
+.card.visible:hover {
+  transform: translateY(-8px);
+}
+
+.imageContainer {
+  position: relative;
+  overflow: hidden;
+}
+
+.card img {
+  width: 100%;
+  height: 340px;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card:hover img {
+  transform: scale(1.05);
+}
+
+.featuredBadge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: #c9a96e;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 2;
+}
+
+.quickAdd {
+  position: absolute;
+  bottom: -50px;
+  left: 0;
+  right: 0;
+  background: rgba(17,17,17,0.9);
+  color: white;
+  border: none;
+  padding: 12px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.3s;
+  opacity: 0;
+}
+
+.card:hover .quickAdd {
+  bottom: 0;
+  opacity: 1;
+}
+
+.cardBody {
+  padding: 22px;
+}
+
+.cardBody h3 {
+  font-size: 18px;
+  margin-bottom: 6px;
+  color: #111;
+}
+
+.cardTag {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.price {
+  color: #c9a96e;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.oldPrice {
+  color: #bbb;
+  font-size: 14px;
+  text-decoration: line-through;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1200px) {
+  .productGrid { grid-template-columns: repeat(2, 1fr); }
+  .hero { grid-template-columns: 1fr; }
+  .heroImage img { height: 600px; }
+}
+
+@media (max-width: 768px) {
+  .navbar { padding: 0 20px; }
+  .navLinks { display: none; }
+  .hero { padding: 50px 20px; }
+  .heroContent h1 { font-size: 46px; }
+  .products { padding: 20px 20px 60px; }
+  .productGrid { grid-template-columns: 1fr; }
+  .heroImage img { height: 450px; }
+  .sectionHeader { flex-direction: column; align-items: flex-start; gap: 16px; }
+}
+
+/* Loading and Error States */
+.loading, .error, .noProducts {
+  text-align: center;
+  padding: 50px 0;
+  font-size: 1.1rem;
+  color: #666;
+  grid-column: 1 / -1; /* Để chiếm toàn bộ chiều rộng của grid */
+}
+.error {
+  color: #ff4d4f;
+}
+.noProducts {
+  font-style: italic;
+}
+
+/* Polish */
+.shopBtn,
+.seeAllBtn,
+.quickAdd {
+  font-weight: 700;
+}
+
+.shopBtn {
+  letter-spacing: 0.6px;
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.14);
+  transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.shopBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 45px rgba(0, 0, 0, 0.18);
+}
+
+.shopBtn:active {
+  transform: translateY(-1px);
+}
+
+.seeAllBtn {
+  background: #fff;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.seeAllBtn:hover {
+  border-color: #111;
+  transform: translateY(-2px);
+}
+
+.card {
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: opacity 0.6s var(--ease-smooth), transform 0.6s var(--ease-smooth), box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-soft);
+}
+
+.quickAdd {
+  transition: bottom 0.3s var(--ease-smooth), opacity 0.3s ease, background 0.2s ease;
+}
+
+.quickAdd:hover {
+  background: #111;
+}

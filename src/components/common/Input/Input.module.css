@@ -1,0 +1,30 @@
+.inputGroup {
+  margin-bottom: 1.25rem;
+  width: 100%;
+}
+
+.label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid #ddd;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.input:focus {
+  border-color: #000;
+}
+
+.errorText {
+  color: #ff4d4f;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}

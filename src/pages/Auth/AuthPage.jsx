@@ -1,10 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import styles from "./AuthPage.module.css";
 import { useNavigate } from "react-router-dom";
+import authApi from "../../api/authApi";
+import { AuthContext } from "../../context/authContextValue";
+import { buildAuthUser, isAdminUser } from "../../utils/authUtils";
 
 export default function AuthPage() {
-
   const navigate = useNavigate();
+  const { login: setAuthUser } = useContext(AuthContext);
   
   const [activeTab, setActiveTab] = useState("login");
   const [toast, setToast] = useState({ show: false, message: "" });
@@ -29,18 +32,14 @@ const handleLogin = async (e) => {
     return;
   }
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: loginForm.email, password: loginForm.password }),
-    });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || "Sai email hoặc mật khẩu");
-    localStorage.setItem("token", data.data.token);
+    const res = await authApi.login({ email: loginForm.email, password: loginForm.password });
+    if (!res.success) throw new Error(res.message || "Sai email hoặc mật khẩu");
+    
+    localStorage.setItem("token", res.data.token);
+    const loggedInUser = buildAuthUser(res.data);
+    setAuthUser(loggedInUser);
     showToast("Đăng nhập thành công ✓");
-      setTimeout(() => {
-        navigate("/home");
-      },800);
+    setTimeout(() => navigate(isAdminUser(loggedInUser) ? "/admin/dashboard" : "/"), 800);
   } catch (err) {
     showToast(err.message);
   }
@@ -57,21 +56,18 @@ const handleLogin = async (e) => {
     return;
   }
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fullName: registerForm.fullName,
-        email: registerForm.email,
-        phone: registerForm.phone,
-        password: registerForm.password,
-      }),
+    const res = await authApi.register({
+      fullName: registerForm.fullName,
+      email: registerForm.email,
+      phone: registerForm.phone,
+      password: registerForm.password,
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || "Đăng ký thất bại");
-    localStorage.setItem("token", data.data.token);
+    if (!res.success) throw new Error(res.message || "Đăng ký thất bại");
+    localStorage.setItem("token", res.data.token);
+    const registeredUser = buildAuthUser(res.data);
+    if (registeredUser) setAuthUser(registeredUser);
     showToast("Đăng ký thành công! ✓");
-    setTimeout(() => setActiveTab("login"), 1500);
+    setTimeout(() => navigate(isAdminUser(registeredUser) ? "/admin/dashboard" : "/"), 800);
   } catch (err) {
     showToast(err.message);
   }
@@ -122,10 +118,6 @@ const handleLogin = async (e) => {
   }, [banners.length]);
 
   // Manual slide effect when dot is clicked
-  const handleDotClick = (index) => {
-    setCurrentBannerIndex(index);
-  };
-
   // Update transform when currentBannerIndex changes
   useEffect(() => {
     if (bannerRef.current) {

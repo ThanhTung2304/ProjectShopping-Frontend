@@ -1,0 +1,74 @@
+.container { max-width: 1400px; margin: 0 auto; padding: 60px 40px; }
+
+.topBar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.count { font-size: 0.9rem; color: #888; }
+.count span { color: #111; font-weight: 600; }
+.sort { font-size: 0.9rem; color: #666; display: flex; align-items: center; gap: 10px; }
+.sort select { border: none; font-weight: 600; outline: none; cursor: pointer; background: transparent; }
+
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+.card { cursor: pointer; transition: transform 0.3s; }
+.imageBox { position: relative; aspect-ratio: 3/4; overflow: hidden; background: #f9f9f9; }
+.imageBox img { width: 100%; height: 100%; object-fit: cover; transition: scale 0.6s; }
+.card:hover img { scale: 1.05; }
+.overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; color: #fff; opacity: 0; transition: 0.3s; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1.5px; font-weight: 600; backdrop-filter: blur(2px); }
+.card:hover .overlay { opacity: 1; }
+.info { padding: 15px 0; }
+.info h3 { font-size: 1rem; font-weight: 500; margin-bottom: 5px; }
+.info p { color: #c9a96e; font-weight: 700; }
+
+.loading, .error, .noProducts {
+  text-align: center;
+  padding: 50px 0;
+  font-size: 1.1rem;
+  color: #666;
+}
+.error { color: #ff4d4f; }
+.resetFilter {
+  display: inline-block;
+  margin-top: 20px;
+  color: #c9a96e;
+}
+@media (max-width: 1024px) { 
+  .grid { grid-template-columns: repeat(2, 1fr); } 
+}
+
+/* Polish */
+.sort select {
+  border: 1px solid #e5e5e5;
+  border-radius: 999px;
+  padding: 9px 34px 9px 14px;
+  background: #fff;
+  font-weight: 700;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sort select:hover {
+  border-color: #111;
+}
+
+.card {
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  transition: transform 0.28s var(--ease-smooth), box-shadow 0.28s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-soft);
+}
+
+.imageBox img {
+  transition: transform 0.6s var(--ease-smooth);
+}
+
+.overlay {
+  background: rgba(0,0,0,0.22);
+  font-weight: 700;
+  transition: opacity 0.3s ease;
+}
+
+.info {
+  padding: 16px 14px 18px;
+}

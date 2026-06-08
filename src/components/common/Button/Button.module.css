@@ -1,0 +1,56 @@
+.btn {
+  padding: 0.8rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+}
+
+.primary {
+  background-color: #000;
+  color: #fff;
+}
+
+.primary:hover {
+  background-color: #333;
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-2px);
+}
+
+.outline {
+  background-color: transparent;
+  border: 1px solid #000;
+  color: #000;
+}
+
+.outline:hover {
+  background-color: #000;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
