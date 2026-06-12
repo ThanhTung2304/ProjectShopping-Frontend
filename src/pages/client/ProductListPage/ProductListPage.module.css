@@ -3,6 +3,8 @@
 .topBar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
 .count { font-size: 0.9rem; color: #888; }
 .count span { color: #111; font-weight: 600; }
+.searchSummary { margin-top: 6px; color: #111; font-size: 0.95rem; }
+.searchSummary strong { color: #c9a96e; }
 .sort { font-size: 0.9rem; color: #666; display: flex; align-items: center; gap: 10px; }
 .sort select { border: none; font-weight: 600; outline: none; cursor: pointer; background: transparent; }
 
@@ -31,6 +33,13 @@
 }
 @media (max-width: 1024px) { 
   .grid { grid-template-columns: repeat(2, 1fr); } 
+}
+
+@media (max-width: 700px) {
+  .container { padding: 40px 20px; }
+  .topBar { align-items: flex-start; flex-direction: column; gap: 18px; }
+  .sort { width: 100%; justify-content: space-between; }
+  .grid { grid-template-columns: 1fr; }
 }
 
 /* Polish */

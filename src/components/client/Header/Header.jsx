@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/authContextValue";
 import { CartContext } from "../../../context/cartContextValue";
+import SearchBar from "../SearchBar/SearchBar";
 import styles from "./Header.module.css";
 
 export default function Header() {
@@ -11,6 +12,7 @@ export default function Header() {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -23,6 +25,7 @@ export default function Header() {
 
   useEffect(() => {
     setIsSidebarOpen(false);
+    setIsSearchOpen(false);
   }, [location.pathname, location.search]);
 
   useEffect(() => {
@@ -36,6 +39,18 @@ export default function Header() {
     logout();
     setIsSidebarOpen(false);
     navigate("/");
+  };
+
+  const handleSearch = (query) => {
+    const keyword = query.trim();
+    setIsSearchOpen(false);
+
+    if (!keyword) {
+      navigate("/products");
+      return;
+    }
+
+    navigate(`/products?search=${encodeURIComponent(keyword)}`);
   };
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -73,9 +88,20 @@ export default function Header() {
           </nav>
 
           <div className={styles.actions}>
-            <button className={styles.iconBtn} type="button">
-              Tìm kiếm
-            </button>
+            <div className={styles.searchAction}>
+              <button
+                className={styles.iconBtn}
+                type="button"
+                aria-expanded={isSearchOpen}
+                onClick={() => setIsSearchOpen((value) => !value)}
+              >
+                Tìm kiếm
+              </button>
+
+              <div className={`${styles.searchPanel} ${isSearchOpen ? styles.searchPanelOpen : ""}`}>
+                <SearchBar onSearch={handleSearch} autoFocus placeholder="Tìm kiếm sản phẩm..." />
+              </div>
+            </div>
 
             <Link to={isAuthenticated ? "/cart" : "/auth"} className={styles.iconBtn}>
               Giỏ hàng
@@ -116,7 +142,7 @@ export default function Header() {
             aria-label="Đóng menu"
             onClick={() => setIsSidebarOpen(false)}
           >
-            ×
+            x
           </button>
         </div>
 

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import orderApi from "../../../api/orderApi";
 import productApi from "../../../api/productApi";
-import { formatMoney, getList, getProductDisplayPrice, safeText } from "../adminPageUtils";
+import { formatMoney, getList, getProductDisplayPrice, getProductStock, safeText } from "../adminPageUtils";
 import styles from "../AdminPages.module.css";
 
 export default function DashboardPage() {
@@ -36,6 +36,14 @@ export default function DashboardPage() {
     [orders],
   );
 
+  const lowStockCount = useMemo(
+    () => products.filter((product) => {
+      const stock = getProductStock(product);
+      return stock !== null && stock <= 5;
+    }).length,
+    [products],
+  );
+
   const latestOrders = orders.slice(0, 5);
 
   return (
@@ -44,7 +52,7 @@ export default function DashboardPage() {
         <div>
           <p className={styles.eyebrow}>Dashboard</p>
           <h1>Tổng quan quản trị</h1>
-          <p>Theo dõi nhanh sản phẩm, đơn hàng và doanh thu.</p>
+          <p>Theo dõi nhanh sản phẩm, đơn hàng, doanh thu và tồn kho theo biến thể.</p>
         </div>
       </div>
 
@@ -66,10 +74,8 @@ export default function DashboardPage() {
         </article>
         <article className={styles.statCard}>
           <p className={styles.statLabel}>Tồn kho thấp</p>
-          <h2 className={styles.statValue}>
-            {products.filter((product) => Number(product.stock || product.quantity || 0) <= 5).length}
-          </h2>
-          <span className={styles.statHint}>Cần kiểm tra thêm</span>
+          <h2 className={styles.statValue}>{lowStockCount}</h2>
+          <span className={styles.statHint}>Tính từ product variants</span>
         </article>
       </div>
 

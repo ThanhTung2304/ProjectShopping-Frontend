@@ -1,32 +1,37 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./SearchBar.module.css";
 
-/**
- * SearchBar Component
- * @param {Function} onSearch - Hàm xử lý khi người dùng submit tìm kiếm
- * @param {string} placeholder - Nội dung gợi ý trong ô input
- */
-export default function SearchBar({ onSearch, placeholder = "Tìm kiếm sản phẩm..." }) {
+export default function SearchBar({
+  autoFocus = false,
+  onSearch,
+  placeholder = "Tìm kiếm sản phẩm...",
+}) {
   const [query, setQuery] = useState("");
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (autoFocus) {
+      inputRef.current?.focus();
+    }
+  }, [autoFocus]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (onSearch) {
-      onSearch(query.trim());
-    }
+    onSearch?.(query.trim());
   };
 
   return (
-    <form className={styles.searchBar} onSubmit={handleSubmit}>
+    <form className={styles.searchBar} onSubmit={handleSubmit} role="search">
       <input
-        type="text"
+        ref={inputRef}
+        type="search"
         className={styles.input}
         placeholder={placeholder}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
-      <button type="submit" className={styles.searchBtn} aria-label="Search">
-        <i className="ri-search-line"></i>
+      <button type="submit" className={styles.searchBtn} aria-label="Tìm kiếm">
+        <span aria-hidden="true">⌕</span>
       </button>
     </form>
   );
