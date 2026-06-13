@@ -1,33 +1,73 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./SearchBar.module.css";
 
-/**
- * SearchBar Component
- * @param {Function} onSearch - Hàm xử lý khi người dùng submit tìm kiếm
- * @param {string} placeholder - Nội dung gợi ý trong ô input
- */
-export default function SearchBar({ onSearch, placeholder = "Tìm kiếm sản phẩm..." }) {
+export default function SearchBar({
+  autoFocus = false,
+  onBlur,
+  onSearch,
+  placeholder = "Tìm kiếm sản phẩm...",
+  searchOnChange = false,
+  showButton = true,
+}) {
   const [query, setQuery] = useState("");
+  const inputRef = useRef(null);
+  const searchTimerRef = useRef(null);
+
+  useEffect(() => {
+    if (autoFocus) {
+      inputRef.current?.focus();
+    }
+  }, [autoFocus]);
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(searchTimerRef.current);
+    };
+  }, []);
+
+  const clearSearchTimer = () => {
+    window.clearTimeout(searchTimerRef.current);
+  };
+
+  const handleChange = (e) => {
+    const nextQuery = e.target.value;
+    setQuery(nextQuery);
+
+    if (!searchOnChange) return;
+
+    clearSearchTimer();
+    searchTimerRef.current = window.setTimeout(() => {
+      onSearch?.(nextQuery.trim());
+    }, 300);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (onSearch) {
-      onSearch(query.trim());
-    }
+    clearSearchTimer();
+    onSearch?.(query.trim());
+  };
+
+  const handleBlur = () => {
+    clearSearchTimer();
+    onBlur?.(query.trim());
   };
 
   return (
-    <form className={styles.searchBar} onSubmit={handleSubmit}>
+    <form className={styles.searchBar} onSubmit={handleSubmit} role="search">
       <input
-        type="text"
+        ref={inputRef}
+        type="search"
         className={styles.input}
         placeholder={placeholder}
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onBlur={handleBlur}
+        onChange={handleChange}
       />
-      <button type="submit" className={styles.searchBtn} aria-label="Search">
-        <i className="ri-search-line"></i>
-      </button>
+      {showButton && (
+        <button type="submit" className={styles.searchBtn} aria-label="Tìm kiếm">
+          <span aria-hidden="true">⌕</span>
+        </button>
+      )}
     </form>
   );
 }

@@ -9,6 +9,7 @@ const titleByPath = {
   "/admin/orders": "Đơn hàng",
   "/admin/users": "Khách hàng",
   "/admin/inventory": "Kho hàng",
+  "/admin/coupons": "Ưu đãi",
 };
 
 export default function AdminHeader() {

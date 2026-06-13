@@ -1,7 +1,7 @@
 .container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 60px 40px;
+  width: 100%;
+  margin: 0;
+  padding: clamp(40px, 5vw, 72px) clamp(20px, 4vw, 72px);
   min-height: 70vh;
 }
 
@@ -14,6 +14,41 @@
 
 .title { font-size: 2rem; margin-bottom: 40px; letter-spacing: 1px; }
 .title span { font-size: 1rem; color: #888; font-weight: 400; margin-left: 10px; }
+
+.headingRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.clearBtn {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 999px;
+  background: #fff;
+  color: #666;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.clearBtn:hover:not(:disabled) {
+  border-color: #111;
+  color: #111;
+  transform: translateY(-1px);
+}
+
+.clearBtn:disabled,
+.removeBtn:disabled,
+.qtyPicker button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
 
 .tableHead {
   display: grid;
@@ -65,6 +100,16 @@
 
 .itemTotal { font-weight: 600; text-align: right; color: #111; }
 
+.error {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid #ffd4d4;
+  border-radius: 8px;
+  background: #fff7f7;
+  color: #c0392b;
+  font-size: 0.9rem;
+}
+
 /* Summary */
 .summaryCard {
   background: #fbfbfb;
@@ -102,7 +147,15 @@
 .continueBtn { background: #000; color: #fff; border: none; padding: 12px 30px; cursor: pointer; font-weight: 600; }
 
 @media (max-width: 992px) { .cartWrapper { grid-template-columns: 1fr; } .summary { order: -1; } }
-@media (max-width: 600px) { .tableHead { display: none; } .cartItem { grid-template-columns: 1fr; gap: 20px; } .itemTotal { text-align: left; } }
+@media (max-width: 600px) {
+  .container { padding: 40px 20px; }
+  .headingRow { display: block; }
+  .title { margin-bottom: 18px; }
+  .clearBtn { margin-bottom: 20px; }
+  .tableHead { display: none; }
+  .cartItem { grid-template-columns: 1fr; gap: 20px; }
+  .itemTotal { text-align: left; }
+}
 
 /* Polish */
 .productInfo img {

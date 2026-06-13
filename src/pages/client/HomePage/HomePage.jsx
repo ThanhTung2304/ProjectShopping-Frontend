@@ -4,12 +4,29 @@ import styles from "./HomePage.module.css";
 import productApi from "../../../api/productApi"; // Import API service
 import {
   formatCurrency,
+  FALLBACK_PRODUCT_IMAGE,
   getProductId,
   getProductImage,
   getProductPathId,
   getProductPrice,
   getResponseList,
 } from "../../../utils/productUtils";
+
+const FEATURED_PRODUCTS_KEY = "featuredProductIds";
+
+const getStoredFeaturedProductIds = () => {
+  try {
+    return JSON.parse(localStorage.getItem(FEATURED_PRODUCTS_KEY) || "[]").map(String);
+  } catch {
+    return [];
+  }
+};
+
+const isFeaturedProduct = (product) =>
+  product?.featured || product?.isFeatured || product?.is_featured || product?.bestSeller;
+
+const getFeaturedProductKeys = (product) =>
+  [product?.id, product?._id, product?.slug].filter(Boolean).map(String);
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -29,7 +46,13 @@ export default function HomePage() {
         
         const data = getResponseList(response);
         if (Array.isArray(data)) {
-          setFeaturedProducts(data);
+          const storedFeaturedIds = getStoredFeaturedProductIds();
+          const featuredOnly = data.filter((product) => {
+            const productKeys = getFeaturedProductKeys(product);
+            return isFeaturedProduct(product) || productKeys.some((key) => storedFeaturedIds.includes(key));
+          });
+
+          setFeaturedProducts(featuredOnly.slice(0, 4));
         } else {
           setError(response.message || "Không thể tải sản phẩm nổi bật.");
         }
@@ -127,8 +150,14 @@ export default function HomePage() {
                 onClick={() => navigate(`/products/${getProductPathId(product)}`)}
               >
                 <div className={styles.imageContainer}>
-                  <img src={getProductImage(product)} alt={product.name} />
-                  {product.featured && (
+                  <img
+                    src={getProductImage(product)}
+                    alt={product.name}
+                    onError={(event) => {
+                      event.currentTarget.src = FALLBACK_PRODUCT_IMAGE;
+                    }}
+                  />
+                  {isFeaturedProduct(product) && (
                     <span className={styles.featuredBadge}>Nổi bật</span>
                   )}
                   <button

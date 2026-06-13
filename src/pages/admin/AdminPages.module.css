@@ -141,10 +141,72 @@
   overflow-x: auto;
 }
 
+.userTableWrap {
+  overflow-x: hidden;
+}
+
 .table {
   width: 100%;
   min-width: 760px;
   border-collapse: collapse;
+}
+
+.userTable {
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.userTable th:nth-child(1),
+.userTable td:nth-child(1) {
+  width: 18%;
+}
+
+.userTable th:nth-child(2),
+.userTable td:nth-child(2) {
+  width: 23%;
+}
+
+.userTable th:nth-child(3),
+.userTable td:nth-child(3) {
+  width: 13%;
+}
+
+.userTable th:nth-child(4),
+.userTable td:nth-child(4) {
+  width: 10%;
+}
+
+.userTable th:nth-child(5),
+.userTable td:nth-child(5) {
+  width: 14%;
+}
+
+.userTable th:nth-child(6),
+.userTable td:nth-child(6) {
+  width: 22%;
+}
+
+.userTable td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userTable .actionRow {
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.userTable th,
+.userTable td {
+  padding-inline: 10px;
+}
+
+.userTable .ghostBtn {
+  min-height: 32px;
+  padding: 0 9px;
+  font-size: 0.78rem;
 }
 
 .table th,
@@ -207,6 +269,7 @@
 
 .actionRow {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -220,10 +283,199 @@
   cursor: pointer;
   font-size: 0.82rem;
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .ghostBtn:hover {
   border-color: #111;
+}
+
+.ghostBtn:disabled,
+.primaryBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  color: #555;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  font-weight: 500;
+  outline: none;
+}
+
+.field input,
+.field select {
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.field textarea {
+  min-height: 100px;
+  padding: 12px;
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: #c9a96e;
+  box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.16);
+}
+
+.fullField,
+.formError {
+  grid-column: 1 / -1;
+}
+
+.checkboxField {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.checkboxField input {
+  width: 18px;
+  height: 18px;
+  accent-color: #111;
+}
+
+.formError {
+  border: 1px solid #ffd5d2;
+  border-radius: 8px;
+  background: #fff5f4;
+  color: #d92d20;
+  padding: 12px;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.variantEditor {
+  display: grid;
+  gap: 12px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.variantHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #111;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.variantHeader small {
+  color: #888;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.variantHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.addVariantForm {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
+}
+
+.variantEmpty {
+  margin: 0;
+  color: #777;
+  font-size: 0.88rem;
+}
+
+.variantList {
+  display: grid;
+  gap: 10px;
+  max-height: 260px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.variantRow {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(120px, 150px) minmax(120px, 150px);
+  gap: 10px;
+  align-items: end;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 10px;
+}
+
+.variantRow:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.variantMeta {
+  display: grid;
+  gap: 4px;
+}
+
+.variantMeta strong {
+  color: #111;
+  font-size: 0.88rem;
+}
+
+.variantMeta span {
+  color: #888;
+  font-size: 0.78rem;
+}
+
+.compactField {
+  display: grid;
+  gap: 6px;
+  color: #555;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.compactField input {
+  min-height: 38px;
+  width: 100%;
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  padding: 0 10px;
+  color: #111;
+  font: inherit;
+  font-weight: 600;
+  outline: none;
+}
+
+.compactField input:focus {
+  border-color: #c9a96e;
+  box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.16);
 }
 
 .list {
@@ -273,4 +525,21 @@
   .contentGrid {
     grid-template-columns: 1fr;
   }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .variantRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.addVariantForm {
+  display: grid;
+  gap: 12px;
+  border: 1px dashed #c9a96e;
+  border-radius: 8px;
+  background: #fffdf8;
+  padding: 14px;
 }

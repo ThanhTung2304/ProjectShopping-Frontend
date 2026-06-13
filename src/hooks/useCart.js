@@ -16,10 +16,10 @@ export function useCart() {
 
   const isEmpty = context.cartItems.length === 0;
 
-  const addItem = async (productId, quantity = 1) => {
+  const addItem = async (productId, quantity = 1, productSnapshot, variantSnapshot) => {
     setSubmittingItemId(productId);
     try {
-      return await context.addToCart(productId, quantity);
+      return await context.addToCart(productId, quantity, productSnapshot, variantSnapshot);
     } finally {
       setSubmittingItemId(null);
     }
@@ -43,6 +43,15 @@ export function useCart() {
     }
   };
 
+  const clearItems = async () => {
+    setSubmittingItemId("all");
+    try {
+      return await context.clearCart();
+    } finally {
+      setSubmittingItemId(null);
+    }
+  };
+
   return {
     ...context,
     itemCount,
@@ -51,6 +60,7 @@ export function useCart() {
     addItem,
     changeQuantity,
     removeItem,
+    clearItems,
   };
 }
 

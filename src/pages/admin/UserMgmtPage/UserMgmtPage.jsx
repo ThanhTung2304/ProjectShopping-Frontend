@@ -1,24 +1,36 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import userApi from "../../../api/userApi";
-import { getId, getList, normalizeRole, safeText } from "../adminPageUtils";
+import Modal from "../../../components/common/Modal/Modal";
+import { getList, normalizeRole, safeText } from "../adminPageUtils";
 import styles from "../AdminPages.module.css";
 
 const getUserName = (user) =>
-  user.fullName || user.name || user.username || `${user.firstName || ""} ${user.lastName || ""}`.trim();
+  user?.fullName || user?.name || user?.username || `${user?.firstName || ""} ${user?.lastName || ""}`.trim();
+
+const getUserId = (user) =>
+  user?.accountId ||
+  user?.account_id ||
+  user?.account?.id ||
+  user?.userId ||
+  user?.user_id ||
+  user?.id ||
+  user?._id;
 
 const getUserRole = (user) => normalizeRole(user.role || user.roles?.[0] || user.authorities?.[0]) || "customer";
 
-const getUserStatusText = (user) => {
-  const status = String(user.status || "").toLowerCase();
-  if (status === "blocked") return "Bị khóa";
-  if (status === "inactive" || user.enabled === false) return "Tạm ngưng";
-  return "Hoạt động";
+const getUserStatusValue = (user) => {
+  const status = String(user?.status || "").toUpperCase();
+  if (status === "BLOCKED" || status === "INACTIVE") return "BLOCKED";
+  if (user?.enabled === false) return "BLOCKED";
+  return "ACTIVE";
 };
 
-const getUserStatusClass = (user) => {
-  if (getUserStatusText(user) !== "Hoạt động") return styles.statusDanger;
-  return styles.statusSuccess;
+const getUserStatusText = (user) => {
+  return getUserStatusValue(user) === "BLOCKED" ? "Bị khóa" : "Hoạt động";
 };
+
+const getUserStatusClass = (user) =>
+  getUserStatusValue(user) === "ACTIVE" ? styles.statusSuccess : styles.statusDanger;
 
 export default function UserMgmtPage() {
   const [users, setUsers] = useState([]);
@@ -26,6 +38,16 @@ export default function UserMgmtPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
+  const [editForm, setEditForm] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    role: "CUSTOMER",
+    status: "ACTIVE",
+  });
+  const [editError, setEditError] = useState("");
+  const [deletingUser, setDeletingUser] = useState(null);
   const didFetchRef = useRef(false);
 
   const fetchUsers = async () => {
@@ -33,10 +55,12 @@ export default function UserMgmtPage() {
     setError("");
 
     try {
-      const res = await userApi.adminGetAll();
-      setUsers(getList(res));
+      const userList = getList(await userApi.adminGetAll());
+      setUsers(userList);
+      return userList;
     } catch (err) {
       setError(err.response?.data?.message || err.message || "Không thể tải danh sách tài khoản.");
+      return [];
     } finally {
       setLoading(false);
     }
@@ -60,12 +84,16 @@ export default function UserMgmtPage() {
   }, [users, query]);
 
   const handleToggleStatus = async (user) => {
-    const id = getId(user);
-    const nextStatus = getUserStatusText(user) === "Hoạt động" ? "BLOCKED" : "ACTIVE";
+    const id = getUserId(user);
+    const nextStatus = getUserStatusValue(user) === "ACTIVE" ? "BLOCKED" : "ACTIVE";
 
     setUpdatingId(id);
     try {
-      await userApi.adminUpdateStatus(id, nextStatus);
+      if (nextStatus === "BLOCKED") {
+        await userApi.adminSoftDelete(id);
+      } else {
+        await userApi.adminUpdateStatus(id, nextStatus);
+      }
       await fetchUsers();
     } catch (err) {
       setError(err.response?.data?.message || err.message || "Không thể cập nhật trạng thái tài khoản.");
@@ -74,34 +102,87 @@ export default function UserMgmtPage() {
     }
   };
 
-  const handleToggleRole = async (user) => {
-    const id = getId(user);
-    const nextRole = getUserRole(user) === "admin" ? "CUSTOMER" : "ADMIN";
+  const openEditModal = (user) => {
+    setError("");
+    setEditError("");
+    setEditingUser(user);
+    setEditForm({
+      fullName: getUserName(user) || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      role: getUserRole(user).toUpperCase(),
+      status: getUserStatusValue(user),
+    });
+  };
+
+  const closeEditModal = () => {
+    if (updatingId) return;
+    setEditingUser(null);
+    setEditError("");
+  };
+
+  const handleEditChange = (event) => {
+    const { name, value } = event.target;
+    setEditForm((currentForm) => ({ ...currentForm, [name]: value }));
+  };
+
+  const handleEditSubmit = async (event) => {
+    event.preventDefault();
+
+    const id = getUserId(editingUser);
+    if (!id) {
+      setEditError("Không tìm thấy mã tài khoản để cập nhật.");
+      return;
+    }
+
+    const payload = {
+      fullName: editForm.fullName.trim(),
+      email: editForm.email.trim(),
+      phone: editForm.phone.trim(),
+      role: editForm.role,
+      status: editForm.status,
+    };
 
     setUpdatingId(id);
+    setEditError("");
     try {
-      await userApi.adminUpdateRole(id, nextRole);
+      await userApi.adminUpdate(id, payload);
       await fetchUsers();
+      setEditingUser(null);
     } catch (err) {
-      if (err.response?.status === 403) {
-        setError("Backend từ chối đổi vai trò tài khoản. Tài khoản admin hiện tại có thể chưa đủ quyền cho thao tác này.");
-      } else {
-        setError(err.response?.data?.message || err.message || "Không thể cập nhật vai trò tài khoản.");
-      }
+      setEditError(err.response?.data?.message || err.message || "Không thể cập nhật tài khoản.");
     } finally {
       setUpdatingId(null);
     }
   };
 
-  const handleDelete = async (user) => {
-    const id = getId(user);
-    const confirmed = window.confirm(`Xóa tài khoản ${getUserName(user) || user.email || id}?`);
-    if (!confirmed) return;
+  const openDeleteModal = (user) => {
+    setError("");
+    setDeletingUser(user);
+  };
+
+  const closeDeleteModal = () => {
+    if (updatingId) return;
+    setDeletingUser(null);
+  };
+
+  const handleDelete = async () => {
+    const id = getUserId(deletingUser);
+    if (!id) {
+      setError("Không tìm thấy mã tài khoản để xóa.");
+      return;
+    }
 
     setUpdatingId(id);
     try {
-      await userApi.adminDelete(id);
-      await fetchUsers();
+      await userApi.adminHardDelete(id);
+      const nextUsers = await fetchUsers();
+      const stillExists = nextUsers.some((user) => String(getUserId(user)) === String(id));
+      if (stillExists) {
+        setError("Backend đã phản hồi xóa cứng nhưng tài khoản vẫn còn trong danh sách. Vui lòng kiểm tra endpoint DELETE /api/admin/users/{id}/hard.");
+        return;
+      }
+      setDeletingUser(null);
     } catch (err) {
       setError(err.response?.data?.message || err.message || "Không thể xóa tài khoản.");
     } finally {
@@ -128,7 +209,7 @@ export default function UserMgmtPage() {
           <input
             className={styles.searchInput}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(event) => setQuery(event.target.value)}
             placeholder="Tìm tên, email, vai trò..."
           />
         </div>
@@ -140,8 +221,8 @@ export default function UserMgmtPage() {
         )}
 
         {!loading && filteredUsers.length > 0 && (
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
+          <div className={`${styles.tableWrap} ${styles.userTableWrap}`}>
+            <table className={`${styles.table} ${styles.userTable}`}>
               <thead>
                 <tr>
                   <th>Tên</th>
@@ -154,8 +235,9 @@ export default function UserMgmtPage() {
               </thead>
               <tbody>
                 {filteredUsers.map((user) => {
-                  const id = getId(user);
+                  const id = getUserId(user);
                   const disabled = updatingId === id;
+
                   return (
                     <tr key={id}>
                       <td className={styles.nameCell}>{safeText(getUserName(user))}</td>
@@ -169,13 +251,28 @@ export default function UserMgmtPage() {
                       </td>
                       <td>
                         <div className={styles.actionRow}>
-                          <button className={styles.ghostBtn} type="button" disabled={disabled} onClick={() => handleToggleStatus(user)}>
-                            {getUserStatusText(user) === "Hoạt động" ? "Khóa" : "Mở"}
+                          <button
+                            className={styles.ghostBtn}
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => openEditModal(user)}
+                          >
+                            Sửa
                           </button>
-                          <button className={styles.ghostBtn} type="button" disabled={disabled} onClick={() => handleToggleRole(user)}>
-                            {getUserRole(user) === "admin" ? "Customer" : "Admin"}
+                          <button
+                            className={styles.ghostBtn}
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => handleToggleStatus(user)}
+                          >
+                            {getUserStatusValue(user) === "ACTIVE" ? "Khóa" : "Mở"}
                           </button>
-                          <button className={styles.ghostBtn} type="button" disabled={disabled} onClick={() => handleDelete(user)}>
+                          <button
+                            className={styles.ghostBtn}
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => openDeleteModal(user)}
+                          >
                             Xóa
                           </button>
                         </div>
@@ -188,6 +285,86 @@ export default function UserMgmtPage() {
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={Boolean(editingUser)}
+        onClose={closeEditModal}
+        title="Sửa tài khoản"
+        footer={
+          <>
+            <button className={styles.ghostBtn} type="button" onClick={closeEditModal} disabled={Boolean(updatingId)}>
+              Hủy
+            </button>
+            <button
+              className={styles.primaryBtn}
+              type="submit"
+              form="admin-user-edit-form"
+              disabled={Boolean(updatingId)}
+            >
+              {updatingId ? "Đang lưu..." : "Lưu thay đổi"}
+            </button>
+          </>
+        }
+      >
+        <form id="admin-user-edit-form" className={styles.formGrid} onSubmit={handleEditSubmit}>
+          {editError && <div className={styles.formError}>{editError}</div>}
+
+          <label className={styles.field}>
+            Họ tên
+            <input name="fullName" value={editForm.fullName} onChange={handleEditChange} required />
+          </label>
+
+          <label className={styles.field}>
+            Email
+            <input name="email" type="email" value={editForm.email} onChange={handleEditChange} required />
+          </label>
+
+          <label className={styles.field}>
+            Số điện thoại
+            <input name="phone" value={editForm.phone} onChange={handleEditChange} />
+          </label>
+
+          <label className={styles.field}>
+            Vai trò
+            <select name="role" value={editForm.role} onChange={handleEditChange}>
+              <option value="CUSTOMER">Customer</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </label>
+
+          <label className={styles.field}>
+            Trạng thái
+            <select name="status" value={editForm.status} onChange={handleEditChange}>
+              <option value="ACTIVE">Hoạt động</option>
+              <option value="BLOCKED">Bị khóa</option>
+            </select>
+          </label>
+        </form>
+      </Modal>
+
+      <Modal
+        isOpen={Boolean(deletingUser)}
+        onClose={closeDeleteModal}
+        title="Xóa tài khoản"
+        footer={
+          <>
+            <button className={styles.ghostBtn} type="button" onClick={closeDeleteModal} disabled={Boolean(updatingId)}>
+              Hủy
+            </button>
+            <button className={styles.primaryBtn} type="button" onClick={handleDelete} disabled={Boolean(updatingId)}>
+              {updatingId ? "Đang xóa..." : "Xóa tài khoản"}
+            </button>
+          </>
+        }
+      >
+        <p className={styles.muted}>
+          Bạn có chắc muốn xóa tài khoản{" "}
+          <strong>{getUserName(deletingUser) || deletingUser?.email || getUserId(deletingUser) || "này"}</strong>? Thao tác này sẽ
+          gọi API xóa tài khoản từ backend.
+        </p>
+      </Modal>
     </section>
   );
 }
+
+

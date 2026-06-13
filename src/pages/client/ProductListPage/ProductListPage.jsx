@@ -1,8 +1,9 @@
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import productApi from "../../../api/productApi";
 import {
   formatCurrency,
+  FALLBACK_PRODUCT_IMAGE,
   getProductId,
   getProductImage,
   getProductPathId,
@@ -10,6 +11,18 @@ import {
   getResponseList,
 } from "../../../utils/productUtils";
 import styles from "./ProductListPage.module.css";
+
+const getProductSearchText = (product) =>
+  [
+    product?.name,
+    product?.description,
+    product?.shortDescription,
+    product?.category?.name,
+    product?.categoryName,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
 
 export default function ProductListPage() {
   const navigate = useNavigate();
@@ -20,6 +33,7 @@ export default function ProductListPage() {
 
   const currentCategory = searchParams.get("category") || "all";
   const currentSort = searchParams.get("sort") || "newest";
+  const currentSearch = (searchParams.get("search") || "").trim();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -30,6 +44,7 @@ export default function ProductListPage() {
         const response = await productApi.getAll({
           category: currentCategory === "all" ? undefined : currentCategory,
           sort: currentSort,
+          search: currentSearch || undefined,
         });
         const data = getResponseList(response);
 
@@ -47,19 +62,47 @@ export default function ProductListPage() {
     };
 
     void fetchProducts();
-  }, [currentCategory, currentSort]);
+  }, [currentCategory, currentSearch, currentSort]);
+
+  const displayedProducts = useMemo(() => {
+    if (!currentSearch) return products;
+
+    const keyword = currentSearch.toLowerCase();
+    return products.filter((product) => getProductSearchText(product).includes(keyword));
+  }, [currentSearch, products]);
+
+  const updateParams = (nextValues) => {
+    const params = new URLSearchParams(searchParams);
+
+    Object.entries(nextValues).forEach(([key, value]) => {
+      if (!value || value === "all") {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+
+    setSearchParams(params);
+  };
 
   const handleSortChange = (e) => {
-    setSearchParams({ category: currentCategory, sort: e.target.value });
+    updateParams({ sort: e.target.value });
   };
 
   return (
     <div className={styles.container}>
       <div className={styles.content}>
         <div className={styles.topBar}>
-          <p className={styles.count}>
-            Hiển thị <span>{products.length}</span> sản phẩm
-          </p>
+          <div>
+            <p className={styles.count}>
+              Hiển thị <span>{displayedProducts.length}</span> sản phẩm
+            </p>
+            {currentSearch && (
+              <p className={styles.searchSummary}>
+                Kết quả cho <strong>{currentSearch}</strong>
+              </p>
+            )}
+          </div>
           <div className={styles.sort}>
             <span>Sắp xếp theo:</span>
             <select value={currentSort} onChange={handleSortChange}>
@@ -73,7 +116,7 @@ export default function ProductListPage() {
         {loading && <div className={styles.loading}>Đang tải sản phẩm...</div>}
         {error && <div className={styles.error}>{error}</div>}
 
-        {!loading && !error && products.length === 0 && (
+        {!loading && !error && displayedProducts.length === 0 && (
           <div className={styles.noProducts}>
             <p>Không tìm thấy sản phẩm nào.</p>
             <Link to="/products" className={styles.resetFilter}>
@@ -82,16 +125,29 @@ export default function ProductListPage() {
           </div>
         )}
 
-        {!loading && !error && products.length > 0 && (
+        {!loading && !error && displayedProducts.length > 0 && (
           <div className={styles.grid}>
-            {products.map((product) => (
+            {displayedProducts.map((product) => (
               <div
                 key={getProductId(product)}
                 className={styles.card}
                 onClick={() => navigate(`/products/${getProductPathId(product)}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    navigate(`/products/${getProductPathId(product)}`);
+                  }
+                }}
               >
                 <div className={styles.imageBox}>
-                  <img src={getProductImage(product)} alt={product.name} />
+                  <img
+                    src={getProductImage(product)}
+                    alt={product.name}
+                    onError={(event) => {
+                      event.currentTarget.src = FALLBACK_PRODUCT_IMAGE;
+                    }}
+                  />
                   <div className={styles.overlay}>Xem chi tiết</div>
                 </div>
                 <div className={styles.info}>

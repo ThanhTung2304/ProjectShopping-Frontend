@@ -26,35 +26,52 @@
 ========================= */
 
 .container {
-  max-width: 1400px;
+  width: 100%;
   height: 100%;
-  margin: 0 auto;
-  padding: 0 40px;
+  margin: 0;
+  padding: 0 clamp(20px, 4vw, 72px);
 
-  display: flex;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
   align-items: center;
-  justify-content: space-between;
+  gap: clamp(28px, 3vw, 48px);
 }
 
 /* =========================
    LOGO
 ========================= */
 
+.brandArea {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 2vw, 32px);
+  min-width: 0;
+  position: relative;
+}
+
 .logo {
   text-decoration: none;
   color: #000;
 
-  font-size: 1.6rem;
-  font-weight: 900;
-  letter-spacing: 5px;
-
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  line-height: 1;
   flex-shrink: 0;
 }
 
-.logo span {
+.logoMain {
+  font-size: 1.16rem;
+  font-weight: 900;
+  letter-spacing: 3.2px;
+}
+
+.logoSub {
+  font-size: 0.76rem;
   font-weight: 300;
   color: #aaa;
-  letter-spacing: 4px;
+  letter-spacing: 3px;
 }
 
 .logo:hover {
@@ -68,7 +85,10 @@
 .nav {
   display: flex;
   align-items: center;
-  gap: 50px;
+  justify-content: center;
+  gap: clamp(24px, 2.4vw, 40px);
+  justify-self: center;
+  min-width: 0;
 }
 
 .navLink {
@@ -83,6 +103,9 @@
   letter-spacing: 2px;
 
   transition: color 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .navLink:hover {
@@ -125,7 +148,58 @@
 .actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 24px;
+  justify-self: end;
+}
+
+.searchField {
+  width: clamp(180px, 20vw, 300px);
+  flex-shrink: 0;
+}
+
+.searchToggle {
+  display: none;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d8d8d8;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  position: absolute;
+  inset: 0;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.searchToggle:hover,
+.searchToggle[aria-expanded="true"] {
+  border-color: #111;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+.searchToggle span {
+  width: 13px;
+  height: 13px;
+  border: 2px solid #111;
+  border-radius: 50%;
+  position: relative;
+  font-size: 0;
+}
+
+.searchToggle span::after {
+  content: "";
+  position: absolute;
+  width: 7px;
+  height: 2px;
+  right: -6px;
+  bottom: -3px;
+  border-radius: 999px;
+  background: #111;
+  transform: rotate(45deg);
 }
 
 /* Dùng cho Link và Button */
@@ -161,6 +235,34 @@
   border-color: #111;
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
   transform: translateY(-1px);
+}
+
+.headerIcon {
+  width: 20px;
+  height: 20px;
+  color: currentColor;
+}
+
+.headerIcon svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .menuBtn {
@@ -401,13 +503,70 @@
    RESPONSIVE
 ========================= */
 
+@media (max-width: 1180px) {
+  .searchExpanded {
+    grid-template-columns: max-content auto max-content;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  .searchExpanded .brandArea {
+    gap: 18px;
+  }
+
+  .searchExpanded .nav {
+    gap: clamp(16px, 2vw, 28px);
+  }
+
+  .searchField {
+    width: 40px;
+    height: 40px;
+    position: relative;
+    overflow: hidden;
+    transition: width 0.32s var(--ease-smooth), filter 0.25s ease;
+  }
+
+  .searchField form {
+    opacity: 0;
+    pointer-events: none;
+    transform: scaleX(0.82);
+    transform-origin: left center;
+    transition: opacity 0.2s ease, transform 0.32s var(--ease-smooth);
+  }
+
+  .searchFieldOpen {
+    width: clamp(180px, 22vw, 240px);
+    filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.06));
+  }
+
+  .searchFieldOpen form {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scaleX(1);
+  }
+
+  .searchToggle {
+    display: inline-flex;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .searchFieldOpen .searchToggle {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.82);
+  }
+}
+
 @media (max-width: 992px) {
   .container {
     padding: 0 20px;
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    gap: 18px;
   }
 
   .nav {
-    gap: 25px;
+    gap: 20px;
   }
 
   .actions {
@@ -415,17 +574,39 @@
   }
 
   .logo {
-    font-size: 1.3rem;
+    gap: 1px;
+  }
+
+  .logoMain {
+    font-size: 1rem;
+    letter-spacing: 2.6px;
+  }
+
+  .logoSub {
+    font-size: 0.68rem;
+    letter-spacing: 2.4px;
+  }
+
+  .searchFieldOpen {
+    width: clamp(160px, 20vw, 200px);
   }
 }
 
 @media (max-width: 768px) {
+  .container {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
   .nav {
     display: none;
   }
 
   .actions {
     gap: 12px;
+  }
+
+  .searchFieldOpen {
+    width: min(230px, calc(100vw - 148px));
   }
 
   .iconBtn,
