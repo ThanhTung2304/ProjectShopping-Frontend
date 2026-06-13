@@ -2,24 +2,8 @@
 > fashion-shop@0.0.0 dev
 > vite --host 127.0.0.1
 
+[2m09:28:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
 
-  [32m[1mVITE[22m v8.0.14[39m  [2mready in [0m[1m718[22m[2m[0m ms[22m
+  [32m[1mVITE[22m v8.0.14[39m  [2mready in [0m[1m466[22m[2m[0m ms[22m
 
   [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5173[22m/[39m
-[2m06:33:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProductMgmtPage/ProductMgmtPage.jsx[22m
-[2m06:33:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProductMgmtPage/ProductMgmtPage.jsx[22m
-[2m06:36:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProductMgmtPage/ProductMgmtPage.jsx[22m
-[2m06:37:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/DashboardPage/DashboardPage.jsx, /src/pages/admin/ProductMgmtPage/ProductMgmtPage.jsx, /src/pages/admin/InventoryPage/InventoryPage.jsx, /src/pages/admin/UserMgmtPage/UserMgmtPage.jsx, /src/pages/admin/OrderMgmtPage/OrderMgmtPage.jsx[22m
-[2m06:38:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProductMgmtPage/ProductMgmtPage.jsx[22m
-[2m06:45:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProductMgmtPage/ProductMgmtPage.jsx[22m
-[2m06:45:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProductMgmtPage/ProductMgmtPage.jsx[22m
-[2m06:46:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProductMgmtPage/ProductMgmtPage.jsx[22m
-[2m06:46:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProductMgmtPage/ProductMgmtPage.jsx[22m
-[2m06:49:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProductMgmtPage/ProductMgmtPage.jsx[22m
-[2m06:51:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProductMgmtPage/ProductMgmtPage.jsx[22m
-[2m07:03:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProductMgmtPage/ProductMgmtPage.jsx[22m
-[2m07:08:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProductMgmtPage/ProductMgmtPage.jsx[22m
-[2m07:14:26[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/DashboardPage/DashboardPage.jsx, /src/pages/admin/InventoryPage/InventoryPage.jsx, /src/pages/admin/UserMgmtPage/UserMgmtPage.jsx, /src/pages/admin/OrderMgmtPage/OrderMgmtPage.jsx[22m
-[2m07:16:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProductMgmtPage/ProductMgmtPage.jsx[22m
-[2m07:21:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/client/ProductDetailPage/ProductDetailPage.jsx[22m
-[2m07:25:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/common/Modal/Modal.jsx[22m

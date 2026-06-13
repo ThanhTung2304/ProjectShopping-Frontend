@@ -262,6 +262,33 @@
   transform: scale(0.99);
 }
 
+.btnPrimary:disabled,
+.btnSecondary:disabled,
+.formInput:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.btnSecondary {
+  width: 100%;
+  padding: 0.7rem;
+  margin-top: 0.75rem;
+  background: #fff;
+  color: #0e0e0e;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btnSecondary:hover {
+  background: #fafafa;
+  border-color: #d6d6d6;
+}
+
 .btnGoogle {
   width: 100%;
   padding: 0.65rem;
@@ -311,10 +338,33 @@
   margin-bottom: 1rem;
   cursor: pointer;
   text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .forgotLink:hover {
   text-decoration: underline;
+}
+
+.forgotHeader {
+  margin-bottom: 1.5rem;
+}
+
+.forgotHeader h2 {
+  margin: 0 0 0.45rem;
+  color: #0e0e0e;
+  font-family: 'Playfair Display', serif;
+  font-size: 30px;
+  font-weight: 400;
+}
+
+.forgotHeader p {
+  margin: 0;
+  color: #777;
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .termsNote {

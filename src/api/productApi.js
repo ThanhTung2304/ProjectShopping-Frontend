@@ -16,6 +16,10 @@ const productApi = {
   getVariants: (productId) =>
     axiosClient.get(`/api/products/${productId}/variants`),
 
+  // GET /api/products/id/{productId}/variants
+  getVariantsById: (productId) =>
+    axiosClient.get(`/api/products/id/${productId}/variants`),
+
   // Nếu backend chưa có API này thì có thể bỏ
   getAllVariants: (params) =>
     axiosClient.get("/api/product-variants", { params }),
@@ -37,7 +41,7 @@ const productApi = {
 
   // POST /api/products/{productId}/variants
   addVariant: (productId, data) =>
-    axiosClient.post(`/api/products/${productId}/variants`, data),
+    axiosClient.post(`/api/products/id/${productId}/variants`, data),
 
   // PUT /api/products/variants/{variantId}
   updateVariant: (variantId, data) =>

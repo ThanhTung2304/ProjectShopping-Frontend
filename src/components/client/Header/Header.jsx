@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/authContextValue";
 import { CartContext } from "../../../context/cartContextValue";
@@ -12,7 +12,7 @@ export default function Header() {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -25,8 +25,11 @@ export default function Header() {
 
   useEffect(() => {
     setIsSidebarOpen(false);
-    setIsSearchOpen(false);
   }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    setIsSearchExpanded(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     document.body.style.overflow = isSidebarOpen ? "hidden" : "";
@@ -41,17 +44,17 @@ export default function Header() {
     navigate("/");
   };
 
-  const handleSearch = (query) => {
+  const handleSearch = useCallback((query) => {
     const keyword = query.trim();
-    setIsSearchOpen(false);
 
     if (!keyword) {
+      setIsSearchExpanded(false);
       navigate("/products");
       return;
     }
 
     navigate(`/products?search=${encodeURIComponent(keyword)}`);
-  };
+  }, [navigate]);
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   const isActive = (path) => location.pathname === path;
@@ -59,14 +62,40 @@ export default function Header() {
   return (
     <>
       <header className={`${styles.header} ${isScrolled ? styles.scrolled : ""}`}>
-        <div className={styles.container}>
-          <Link to="/" className={styles.logo}>
-            LEANH <span>STUDIO</span>
-          </Link>
+        <div className={`${styles.container} ${isSearchExpanded ? styles.searchExpanded : ""}`}>
+          <div className={styles.brandArea}>
+            <Link to="/home" className={styles.logo}>
+              <span className={styles.logoMain}>LEANH</span>
+              <span className={styles.logoSub}>STUDIO</span>
+            </Link>
+
+            <div className={`${styles.searchField} ${isSearchExpanded ? styles.searchFieldOpen : ""}`}>
+              <SearchBar
+                autoFocus={isSearchExpanded}
+                onBlur={(query) => {
+                  if (!query) setIsSearchExpanded(false);
+                }}
+                onSearch={handleSearch}
+                placeholder="Tìm kiếm sản phẩm..."
+                searchOnChange
+                showButton={false}
+              />
+
+              <button
+                className={styles.searchToggle}
+                type="button"
+                aria-label="Mở tìm kiếm"
+                aria-expanded={isSearchExpanded}
+                onClick={() => setIsSearchExpanded(true)}
+              >
+                <span aria-hidden="true" />
+              </button>
+            </div>
+          </div>
 
           <nav className={styles.nav}>
             <Link
-              to="/"
+              to="/home"
               className={`${styles.navLink} ${isActive("/") || isActive("/home") ? styles.active : ""}`}
             >
               Trang chủ
@@ -85,26 +114,33 @@ export default function Header() {
             >
               Bộ sưu tập
             </Link>
+
+            <Link
+              to="/vouchers"
+              className={`${styles.navLink} ${isActive("/vouchers") ? styles.active : ""}`}
+            >
+              Ưu đãi
+            </Link>
           </nav>
 
           <div className={styles.actions}>
-            <div className={styles.searchAction}>
-              <button
-                className={styles.iconBtn}
-                type="button"
-                aria-expanded={isSearchOpen}
-                onClick={() => setIsSearchOpen((value) => !value)}
-              >
-                Tìm kiếm
-              </button>
-
-              <div className={`${styles.searchPanel} ${isSearchOpen ? styles.searchPanelOpen : ""}`}>
-                <SearchBar onSearch={handleSearch} autoFocus placeholder="Tìm kiếm sản phẩm..." />
-              </div>
-            </div>
+            <button className={styles.iconBtn} type="button" aria-label="Thông báo">
+              <span className={styles.headerIcon} aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z" />
+                  <path d="M10 20a2 2 0 0 0 4 0" />
+                </svg>
+              </span>
+            </button>
 
             <Link to={isAuthenticated ? "/cart" : "/auth"} className={styles.iconBtn}>
-              Giỏ hàng
+              <span className={styles.headerIcon} aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M6 8h12l-1 12H7L6 8Z" />
+                  <path d="M9 8a3 3 0 0 1 6 0" />
+                </svg>
+              </span>
+              <span className={styles.visuallyHidden}>Giỏ hàng</span>
               <span className={styles.cartBadge}>{cartCount}</span>
             </Link>
 

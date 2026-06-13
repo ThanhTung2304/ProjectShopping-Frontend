@@ -1,0 +1,179 @@
+.container {
+  width: 100%;
+  margin: 0;
+  padding: clamp(42px, 5vw, 80px) clamp(20px, 4vw, 72px) clamp(64px, 6vw, 96px);
+}
+
+.header {
+  max-width: 760px;
+  margin-bottom: 34px;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: #c9a96e;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.header h1 {
+  margin: 0;
+  color: #111;
+  font-size: clamp(2.4rem, 5vw, 5rem);
+  line-height: 0.98;
+  text-transform: uppercase;
+}
+
+.header p {
+  max-width: 620px;
+  margin: 18px 0 0;
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.card {
+  min-height: 270px;
+  padding: 26px;
+  border: 1px solid #ececec;
+  border-radius: 8px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.04);
+}
+
+.condition {
+  display: inline-flex;
+  margin-bottom: 16px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #f7f2e8;
+  color: #9b783d;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.card h2,
+.cta h2 {
+  margin: 0;
+  color: #111;
+  line-height: 1.15;
+}
+
+.card h2 {
+  font-size: 1.35rem;
+}
+
+.card p {
+  margin: 12px 0 0;
+  color: #666;
+  line-height: 1.7;
+}
+
+.card small {
+  display: block;
+  margin-top: 12px;
+  color: #999;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.codeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.codeRow code {
+  padding: 10px 12px;
+  border: 1px dashed #c9a96e;
+  border-radius: 8px;
+  color: #111;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+}
+
+.codeRow button,
+.cta a {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cta {
+  margin-top: 28px;
+  padding: 28px;
+  border-radius: 8px;
+  background: #f8f8f8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.cta h2 {
+  font-size: clamp(1.25rem, 2vw, 1.8rem);
+}
+
+.state {
+  padding: 60px 0;
+  color: #666;
+  text-align: center;
+  font-size: 1.05rem;
+}
+
+.error {
+  color: #ff4d4f;
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .container {
+    padding: 42px 20px 64px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .codeRow,
+  .cta {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .codeRow button,
+  .cta a {
+    justify-content: center;
+  }
+}

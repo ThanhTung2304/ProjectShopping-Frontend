@@ -141,10 +141,72 @@
   overflow-x: auto;
 }
 
+.userTableWrap {
+  overflow-x: hidden;
+}
+
 .table {
   width: 100%;
   min-width: 760px;
   border-collapse: collapse;
+}
+
+.userTable {
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.userTable th:nth-child(1),
+.userTable td:nth-child(1) {
+  width: 18%;
+}
+
+.userTable th:nth-child(2),
+.userTable td:nth-child(2) {
+  width: 23%;
+}
+
+.userTable th:nth-child(3),
+.userTable td:nth-child(3) {
+  width: 13%;
+}
+
+.userTable th:nth-child(4),
+.userTable td:nth-child(4) {
+  width: 10%;
+}
+
+.userTable th:nth-child(5),
+.userTable td:nth-child(5) {
+  width: 14%;
+}
+
+.userTable th:nth-child(6),
+.userTable td:nth-child(6) {
+  width: 22%;
+}
+
+.userTable td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userTable .actionRow {
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.userTable th,
+.userTable td {
+  padding-inline: 10px;
+}
+
+.userTable .ghostBtn {
+  min-height: 32px;
+  padding: 0 9px;
+  font-size: 0.78rem;
 }
 
 .table th,
@@ -207,6 +269,7 @@
 
 .actionRow {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -220,6 +283,7 @@
   cursor: pointer;
   font-size: 0.82rem;
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .ghostBtn:hover {
@@ -331,6 +395,19 @@
   color: #888;
   font-size: 0.78rem;
   font-weight: 700;
+}
+
+.variantHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.addVariantForm {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
 }
 
 .variantEmpty {

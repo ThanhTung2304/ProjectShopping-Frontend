@@ -14,11 +14,14 @@ const userApi = {
   // Admin
   adminGetAll: () => axiosClient.get("/api/admin/users"),
   adminGetById: (id) => axiosClient.get(`/api/admin/users/${id}`),
+  adminUpdate: (id, data) => axiosClient.put(`/api/admin/users/${id}`, data),
   adminUpdateStatus: (id, status) =>
-    axiosClient.patch(`/api/admin/users/${id}/status`, null, { params: { status } }),
+    axiosClient.patch(`/api/admin/users/${id}/status`, { status }),
   adminUpdateRole: (id, role) =>
-    axiosClient.patch(`/api/admin/users/${id}/role`, null, { params: { role } }),
-  adminDelete: (id) => axiosClient.delete(`/api/admin/users/${id}`),
+    axiosClient.patch(`/api/admin/users/${id}/role`, { role }),
+  adminSoftDelete: (id) => axiosClient.delete(`/api/admin/users/${id}`),
+  adminHardDelete: (id) => axiosClient.delete(`/api/admin/users/${id}/hard`),
+  adminDelete: (id) => axiosClient.delete(`/api/admin/users/${id}/hard`),
 };
 
 export default userApi;

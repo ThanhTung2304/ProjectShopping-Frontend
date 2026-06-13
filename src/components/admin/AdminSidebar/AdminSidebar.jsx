@@ -8,6 +8,7 @@ export default function AdminSidebar() {
     { path: "/admin/orders", icon: "ri-bill-line", label: "Đơn hàng" },
     { path: "/admin/users", icon: "ri-user-settings-line", label: "Khách hàng" },
     { path: "/admin/inventory", icon: "ri-stack-line", label: "Kho hàng" },
+    { path: "/admin/coupons", icon: "ri-coupon-3-line", label: "Ưu đãi" },
   ];
 
   return (

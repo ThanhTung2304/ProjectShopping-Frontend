@@ -3,9 +3,38 @@ import productApi from "../../../api/productApi";
 import { formatStock, getId, getList, getProductStock, safeText } from "../adminPageUtils";
 import styles from "../AdminPages.module.css";
 
+const fetchProductVariants = async (product) => {
+  const productId = getId(product);
+  if (!productId) return [];
+
+  const attempts = [
+    () => productApi.getVariantsById(productId),
+    () => productApi.getVariants(productId),
+  ];
+
+  for (const attempt of attempts) {
+    try {
+      const variants = getList(await attempt());
+      if (variants.length > 0) return variants;
+    } catch {
+      // Try the next supported variants route.
+    }
+  }
+
+  return [];
+};
+
 const fetchProductList = async () => {
-  const response = await productApi.getAll();
-  return getList(response);
+  const products = getList(await productApi.getAll());
+
+  return Promise.all(
+    products.map(async (product) => {
+      if (getProductStock(product) !== null) return product;
+
+      const variants = await fetchProductVariants(product);
+      return variants.length > 0 ? { ...product, variants } : product;
+    }),
+  );
 };
 
 export default function InventoryPage() {
@@ -19,8 +48,13 @@ export default function InventoryPage() {
       setDetailWarning("");
 
       try {
-        setProducts(await fetchProductList());
-        setDetailWarning("Backend chưa trả dữ liệu variants trong danh sách sản phẩm. Không gọi /api/admin/products/{id} vì endpoint này đang lỗi 500.");
+        const productsWithStock = await fetchProductList();
+        setProducts(productsWithStock);
+        setDetailWarning(
+          productsWithStock.some((product) => getProductStock(product) === null)
+            ? "Một số sản phẩm chưa có dữ liệu tồn kho từ backend."
+            : "",
+        );
       } finally {
         setLoading(false);
       }

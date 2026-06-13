@@ -1,7 +1,7 @@
 .container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 64px 40px 80px;
+  width: 100%;
+  margin: 0;
+  padding: clamp(42px, 5vw, 80px) clamp(20px, 4vw, 72px) clamp(64px, 6vw, 96px);
 }
 
 .header {

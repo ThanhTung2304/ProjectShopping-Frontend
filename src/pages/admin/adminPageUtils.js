@@ -4,7 +4,8 @@ import { isAdminRole, isAdminUser, normalizeRole } from "../../utils/authUtils";
 export const getList = getResponseList;
 export const getItem = getResponseItem;
 
-export const getId = (item) => item?.id || item?._id || item?.slug;
+export const getId = (item) =>
+  item?.id || item?._id || item?.productId || item?.product_id || item?.couponId || item?.coupon_id || item?.slug;
 
 export const formatMoney = (value) => formatCurrency(value);
 
@@ -12,12 +13,25 @@ export const getVariantPrice = (variant) =>
   Number(variant?.salePrice ?? variant?.sale_price ?? variant?.price ?? 0);
 
 export const getVariantStock = (variant) =>
-  Number(variant?.stockQuantity ?? variant?.stock_quantity ?? variant?.stock ?? variant?.quantity ?? 0);
+  Number(
+    variant?.stockQuantity ??
+      variant?.stock_quantity ??
+      variant?.quantityInStock ??
+      variant?.inventoryQuantity ??
+      variant?.availableStock ??
+      variant?.stock ??
+      variant?.quantity ??
+      0,
+  );
 
 export const isVariantActive = (variant) => variant?.isActive ?? variant?.is_active ?? variant?.active ?? true;
 
-export const getActiveVariants = (product) =>
-  Array.isArray(product?.variants) ? product.variants.filter(isVariantActive) : [];
+export const getProductVariants = (product) =>
+  getResponseList(product?.variants)
+    .concat(getResponseList(product?.productVariants))
+    .concat(getResponseList(product?.product_variants));
+
+export const getActiveVariants = (product) => getProductVariants(product).filter(isVariantActive);
 
 export const getVariantProductId = (variant) => {
   if (variant?.productId && typeof variant.productId !== "object") return variant.productId;
@@ -50,7 +64,16 @@ export const getProductDisplayPrice = (product) => {
 
 export const getProductStock = (product) => {
   const variantStock = getActiveVariants(product).reduce((total, variant) => total + getVariantStock(variant), 0);
-  const directStock = product?.totalStock ?? product?.total_stock ?? product?.stock ?? product?.quantity;
+  const directStock =
+    product?.totalStock ??
+    product?.total_stock ??
+    product?.stockQuantity ??
+    product?.stock_quantity ??
+    product?.quantityInStock ??
+    product?.inventoryQuantity ??
+    product?.availableStock ??
+    product?.stock ??
+    product?.quantity;
 
   if (directStock !== undefined && directStock !== null) {
     return Number(directStock);

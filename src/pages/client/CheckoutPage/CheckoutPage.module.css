@@ -1,7 +1,7 @@
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 60px 40px;
+  width: 100%;
+  margin: 0;
+  padding: clamp(40px, 5vw, 72px) clamp(20px, 4vw, 72px);
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 60px;

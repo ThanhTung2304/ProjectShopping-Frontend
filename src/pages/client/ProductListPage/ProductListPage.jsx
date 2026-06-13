@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import productApi from "../../../api/productApi";
 import {
   formatCurrency,
+  FALLBACK_PRODUCT_IMAGE,
   getProductId,
   getProductImage,
   getProductPathId,
@@ -140,7 +141,13 @@ export default function ProductListPage() {
                 }}
               >
                 <div className={styles.imageBox}>
-                  <img src={getProductImage(product)} alt={product.name} />
+                  <img
+                    src={getProductImage(product)}
+                    alt={product.name}
+                    onError={(event) => {
+                      event.currentTarget.src = FALLBACK_PRODUCT_IMAGE;
+                    }}
+                  />
                   <div className={styles.overlay}>Xem chi tiết</div>
                 </div>
                 <div className={styles.info}>
