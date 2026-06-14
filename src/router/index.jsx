@@ -9,6 +9,7 @@ import OrderMgmtPage from "../pages/admin/OrderMgmtPage/OrderMgmtPage";
 import ProductMgmtPage from "../pages/admin/ProductMgmtPage/ProductMgmtPage";
 import UserMgmtPage from "../pages/admin/UserMgmtPage/UserMgmtPage";
 import CartPage from "../pages/client/CartPage/CartPage";
+import CollectionDetailPage from "../pages/client/CollectionDetailPage/CollectionDetailPage";
 import CollectionPage from "../pages/client/CollectionPage/CollectionPage";
 import CheckoutPage from "../pages/client/CheckoutPage/CheckoutPage";
 import HomePage from "../pages/client/HomePage/HomePage";
@@ -30,6 +31,7 @@ export default function AppRouter() {
           <Route path="/home" element={<HomePage />} />
           <Route path="/products" element={<ProductListPage />} />
           <Route path="/collections" element={<CollectionPage />} />
+          <Route path="/collections/:categoryId" element={<CollectionDetailPage />} />
           <Route path="/vouchers" element={<VoucherPage />} />
           <Route path="/products/:id" element={<ProductDetailPage />} />
           <Route

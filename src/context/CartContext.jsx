@@ -1,7 +1,9 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import cartApi from "../api/cartApi";
+import productApi from "../api/productApi";
 import { AuthContext } from "./authContextValue";
 import { CartContext } from "./cartContextValue";
+import { getProductImage, getResponseItem, resolveImageUrl } from "../utils/productUtils";
 
 const LOCAL_CART_KEY = "fashion_shop_local_cart";
 
@@ -16,6 +18,13 @@ const getLocalCart = () => {
 
 const saveLocalCart = (items) => {
   localStorage.setItem(LOCAL_CART_KEY, JSON.stringify(items));
+};
+
+const getCartItemImage = (item, product) => {
+  const directImage = item.image || item.img;
+  if (directImage) return resolveImageUrl(typeof directImage === "string" ? directImage : getProductImage({ images: [directImage] }));
+
+  return getProductImage(product);
 };
 
 const normalizeCartItem = (item) => {
@@ -50,9 +59,23 @@ const normalizeCartItem = (item) => {
         0,
     ),
     quantity: Number(item.quantity ?? 1),
-    image: item.image || item.img || product.image || product.img || product.thumbnail || product.images?.[0],
+    image: getCartItemImage(item, product),
   };
 };
+
+const hydrateCartItemImage = async (item) => {
+  if (item.image && !item.image.startsWith(FALLBACK_CART_IMAGE_PREFIX)) return item;
+  if (!item.productId) return item;
+
+  try {
+    const product = getResponseItem(await productApi.getById(item.productId));
+    return product ? { ...item, image: getProductImage(product), product: { ...item.product, ...product } } : item;
+  } catch {
+    return item;
+  }
+};
+
+const FALLBACK_CART_IMAGE_PREFIX = "data:image/svg+xml";
 
 const mergeCartItems = (serverItems, localItems) => {
   const merged = [...serverItems];
@@ -129,7 +152,7 @@ export const CartProvider = ({ children }) => {
   };
 
   const fetchCart = useCallback(async ({ keepCurrentOnEmpty = false } = {}) => {
-    const localItems = getLocalCart().map(normalizeCartItem);
+    const localItems = await Promise.all(getLocalCart().map(normalizeCartItem).map(hydrateCartItemImage));
 
     if (!user) {
       setCartItems(localItems);
@@ -144,7 +167,9 @@ export const CartProvider = ({ children }) => {
       const res = await cartApi.getCart();
       if (res.success) {
         const items = res.data?.items || res.data || [];
-        const normalizedItems = Array.isArray(items) ? items.map(normalizeCartItem) : [];
+        const normalizedItems = Array.isArray(items)
+          ? await Promise.all(items.map(normalizeCartItem).map(hydrateCartItemImage))
+          : [];
         const mergedItems = mergeCartItems(normalizedItems, localItems);
 
         if (mergedItems.length > 0 || !keepCurrentOnEmpty) {

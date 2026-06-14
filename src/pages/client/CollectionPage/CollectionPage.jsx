@@ -6,7 +6,7 @@ import styles from "./CollectionPage.module.css";
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=900&q=80";
 
-const getCategoryFilterValue = (category) => category?.slug || category?.id || category?._id;
+const getCategoryFilterValue = (category) => category?.id || category?._id || category?.slug;
 
 const getCategoryKey = (category, index) =>
   getCategoryFilterValue(category) || category?.name || `category-${index}`;
@@ -62,7 +62,7 @@ export default function CollectionPage() {
     const categoryValue = getCategoryFilterValue(category);
     if (!categoryValue) return;
 
-    navigate(`/products?category=${encodeURIComponent(categoryValue)}`);
+    navigate(`/collections/${encodeURIComponent(categoryValue)}`);
   };
 
   return (

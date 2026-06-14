@@ -9,6 +9,7 @@ import {
   getProductImage,
   getProductPathId,
   getProductPrice,
+  getResponseItem,
   getResponseList,
 } from "../../../utils/productUtils";
 
@@ -27,6 +28,20 @@ const isFeaturedProduct = (product) =>
 
 const getFeaturedProductKeys = (product) =>
   [product?.id, product?._id, product?.slug].filter(Boolean).map(String);
+
+const hydrateProductsWithImages = async (items) =>
+  Promise.all(
+    items.map(async (product) => {
+      if (Array.isArray(product?.images) && product.images.length > 0) return product;
+
+      try {
+        const detail = getResponseItem(await productApi.getById(getProductId(product)));
+        return detail ? { ...product, ...detail } : product;
+      } catch {
+        return product;
+      }
+    }),
+  );
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -52,7 +67,7 @@ export default function HomePage() {
             return isFeaturedProduct(product) || productKeys.some((key) => storedFeaturedIds.includes(key));
           });
 
-          setFeaturedProducts(featuredOnly.slice(0, 4));
+          setFeaturedProducts(await hydrateProductsWithImages(featuredOnly.slice(0, 4)));
         } else {
           setError(response.message || "Không thể tải sản phẩm nổi bật.");
         }

@@ -77,7 +77,13 @@ export default function CartPage() {
             return (
               <div key={item.id} className={styles.cartItem}>
                 <div className={styles.productInfo}>
-                  <img src={item.image || FALLBACK_IMAGE} alt={item.name} />
+                  <img
+                    src={item.image || FALLBACK_IMAGE}
+                    alt={item.name}
+                    onError={(event) => {
+                      event.currentTarget.src = FALLBACK_IMAGE;
+                    }}
+                  />
                   <div className={styles.details}>
                     <h3>{item.name}</h3>
                     <p className={styles.price}>{formatCurrency(item.price)}</p>

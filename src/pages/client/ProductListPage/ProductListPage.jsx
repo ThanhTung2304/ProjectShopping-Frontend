@@ -8,7 +8,10 @@ import {
   getProductImage,
   getProductPathId,
   getProductPrice,
+  getResponseItem,
   getResponseList,
+  matchesProductCategory,
+  sortProductList,
 } from "../../../utils/productUtils";
 import styles from "./ProductListPage.module.css";
 
@@ -23,6 +26,20 @@ const getProductSearchText = (product) =>
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
+
+const hydrateProductsWithImages = async (items) =>
+  Promise.all(
+    items.map(async (product) => {
+      if (Array.isArray(product?.images) && product.images.length > 0) return product;
+
+      try {
+        const detail = getResponseItem(await productApi.getById(getProductId(product)));
+        return detail ? { ...product, ...detail } : product;
+      } catch {
+        return product;
+      }
+    }),
+  );
 
 export default function ProductListPage() {
   const navigate = useNavigate();
@@ -43,13 +60,14 @@ export default function ProductListPage() {
       try {
         const response = await productApi.getAll({
           category: currentCategory === "all" ? undefined : currentCategory,
+          categoryId: currentCategory === "all" ? undefined : currentCategory,
           sort: currentSort,
           search: currentSearch || undefined,
         });
         const data = getResponseList(response);
 
         if (Array.isArray(data)) {
-          setProducts(data);
+          setProducts(await hydrateProductsWithImages(data));
         } else {
           setError(response?.message || "Không thể tải sản phẩm.");
         }
@@ -65,11 +83,16 @@ export default function ProductListPage() {
   }, [currentCategory, currentSearch, currentSort]);
 
   const displayedProducts = useMemo(() => {
-    if (!currentSearch) return products;
+    const categoryProducts = products.filter((product) => matchesProductCategory(product, currentCategory));
+
+    if (!currentSearch) return sortProductList(categoryProducts, currentSort);
 
     const keyword = currentSearch.toLowerCase();
-    return products.filter((product) => getProductSearchText(product).includes(keyword));
-  }, [currentSearch, products]);
+    return sortProductList(
+      categoryProducts.filter((product) => getProductSearchText(product).includes(keyword)),
+      currentSort,
+    );
+  }, [currentCategory, currentSearch, currentSort, products]);
 
   const updateParams = (nextValues) => {
     const params = new URLSearchParams(searchParams);

@@ -1,38 +1,40 @@
 import { useEffect, useState } from 'react';
 import userApi from '../api/userApi';
-import { buildAuthUser, getTokenUser } from '../utils/authUtils';
+import { buildAuthUser } from '../utils/authUtils';
 import { AuthContext } from './authContextValue';
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => getTokenUser());
-  const [loading, setLoading] = useState(() => Boolean(localStorage.getItem('token')));
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const clearSession = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
     userApi.getMe()
       .then((res) => {
-        if (res.success && res.data) setUser(buildAuthUser(res.data));
-      })
-      .catch(async () => {
-        try {
-          const res = await userApi.getProfile();
-          if (res.success && res.data) setUser(buildAuthUser(res.data));
-        } catch {
-          setUser((currentUser) => currentUser || getTokenUser());
+        if (res.success && res.data) {
+          setUser(buildAuthUser(res.data));
+        } else {
+          clearSession();
         }
+      })
+      .catch(() => {
+        clearSession();
       })
       .finally(() => setLoading(false));
   }, []);
 
   const login = (userData) => {
-    setUser(userData || getTokenUser());
-  };
-
-  const clearSession = () => {
-    localStorage.removeItem('token');
-    setUser(null);
+    setUser(userData);
   };
 
   const logout = () => {
@@ -45,7 +47,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     clearSession,
     loading,
-    isAuthenticated: Boolean(localStorage.getItem('token')),
+    isAuthenticated: Boolean(user),
   };
 
   return (

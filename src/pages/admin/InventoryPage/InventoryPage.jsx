@@ -7,10 +7,7 @@ const fetchProductVariants = async (product) => {
   const productId = getId(product);
   if (!productId) return [];
 
-  const attempts = [
-    () => productApi.getVariantsById(productId),
-    () => productApi.getVariants(productId),
-  ];
+  const attempts = [() => productApi.getVariants(productId)];
 
   for (const attempt of attempts) {
     try {
