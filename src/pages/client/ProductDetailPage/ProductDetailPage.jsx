@@ -10,6 +10,7 @@ import {
   getProductPrice,
   getResponseItem,
   getResponseList,
+  resolveImageUrl,
 } from "../../../utils/productUtils";
 import styles from "./ProductDetailPage.module.css";
 
@@ -30,9 +31,26 @@ const normalizeList = (value) => {
   return [];
 };
 
+const getImageUrl = (image) => {
+  if (!image) return "";
+  if (typeof image === "string") return resolveImageUrl(image);
+  return resolveImageUrl(image.imageUrl || image.image_url || image.url || image.src || image.path || "");
+};
+
+const sortImages = (images = []) =>
+  [...images].sort((first, second) => {
+    const firstPrimary = first?.isPrimary ?? first?.is_primary ?? false;
+    const secondPrimary = second?.isPrimary ?? second?.is_primary ?? false;
+
+    if (firstPrimary !== secondPrimary) return firstPrimary ? -1 : 1;
+
+    return Number(first?.sortOrder ?? first?.sort_order ?? 0) - Number(second?.sortOrder ?? second?.sort_order ?? 0);
+  });
+
 const getProductImages = (product) => {
-  const images = normalizeList(product?.images)
-    .concat(normalizeList(product?.gallery))
+  const images = sortImages(normalizeList(product?.images).concat(normalizeList(product?.productImages)))
+    .map(getImageUrl)
+    .concat(normalizeList(product?.gallery).map(getImageUrl))
     .concat([product?.image, product?.img, product?.thumbnail].filter(Boolean));
   const uniqueImages = [...new Set(images)];
 
@@ -94,20 +112,11 @@ const fetchProductDetail = async (routeId, listProduct) => {
 const fetchProductVariants = async (productId) => {
   if (!productId) return [];
 
-  const attempts = [
-    () => productApi.getVariants(productId),
-    () => productApi.adminGetVariants(productId),
-  ];
-
-  for (const attempt of attempts) {
-    try {
-      return getResponseList(await attempt());
-    } catch {
-      // Backend variants may be protected or not exposed on the public route yet.
-    }
+  try {
+    return getResponseList(await productApi.getVariants(productId));
+  } catch {
+    return [];
   }
-
-  return [];
 };
 
 const mergeProductWithConcreteId = async (product, routeId) => {

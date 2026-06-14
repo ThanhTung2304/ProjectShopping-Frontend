@@ -10,6 +10,8 @@ const initialForm = {
   slug: "",
   description: "",
   categoryId: "",
+  images: [],
+  deletedImageIds: [],
   featured: false,
   isActive: true,
   variants: [],
@@ -23,6 +25,17 @@ const initialVariant = {
   salePrice: "",
   stockQuantity: 0,
   isActive: true,
+};
+
+const initialImage = {
+  id: "",
+  tempId: "",
+  file: null,
+  imageUrl: "",
+  previewUrl: "",
+  isPrimary: false,
+  sortOrder: 0,
+  isNew: true,
 };
 
 const FEATURED_PRODUCTS_KEY = "featuredProductIds";
@@ -41,10 +54,7 @@ const fetchProductVariants = async (product) => {
   const productId = getId(product);
   if (!productId) return [];
 
-  const attempts = [
-    () => productApi.getVariantsById(productId),
-    () => productApi.getVariants(productId),
-  ];
+  const attempts = [() => productApi.getVariants(productId)];
 
   for (const attempt of attempts) {
     try {
@@ -117,6 +127,44 @@ const getActiveValue = (item) => item?.isActive ?? item?.is_active ?? item?.acti
 const getFeaturedValue = (product) =>
   product?.featured ?? product?.isFeatured ?? product?.is_featured ?? product?.bestSeller ?? false;
 
+const getImageUrl = (image) => {
+  if (!image) return "";
+  if (typeof image === "string") return image;
+  return image.imageUrl || image.image_url || image.url || image.src || image.path || "";
+};
+
+const getProductImages = (product) => {
+  const images = []
+    .concat(Array.isArray(product?.images) ? product.images : [])
+    .concat(Array.isArray(product?.productImages) ? product.productImages : [])
+    .concat(Array.isArray(product?.product_images) ? product.product_images : [])
+    .concat([product?.image, product?.img, product?.thumbnail].filter(Boolean));
+
+  const normalizedImages = images
+    .map((image, index) => ({
+      id: typeof image === "object" ? getId(image) : undefined,
+      tempId: `image-${index}-${Date.now()}`,
+      file: null,
+      imageUrl: getImageUrl(image),
+      previewUrl: getImageUrl(image),
+      isPrimary: typeof image === "object" ? image?.isPrimary ?? image?.is_primary ?? false : index === 0,
+      sortOrder: Number(typeof image === "object" ? image?.sortOrder ?? image?.sort_order ?? index : index),
+      isNew: false,
+    }))
+    .filter((image) => image.imageUrl);
+
+  const uniqueImages = normalizedImages.filter(
+    (image, index, list) => list.findIndex((item) => item.imageUrl === image.imageUrl) === index,
+  );
+
+  return uniqueImages.sort((first, second) => {
+    if (first.isPrimary !== second.isPrimary) return first.isPrimary ? -1 : 1;
+    return Number(first.sortOrder || 0) - Number(second.sortOrder || 0);
+  });
+};
+
+const loadProductImages = async (productId) => getProductImages({ images: getList(await productApi.getImages(productId)) });
+
 const getVariantSalePrice = (variant) => variant?.salePrice ?? variant?.sale_price ?? "";
 
 const buildVariantForm = (variant) => ({
@@ -137,6 +185,8 @@ const buildProductForm = (product, categories = []) => ({
   slug: product?.slug || "",
   description: product?.description || "",
   categoryId: getCategoryId(product, categories),
+  images: getProductImages(product),
+  deletedImageIds: [],
   featured: getFeaturedValue(product),
   isActive: getActiveValue(product),
   variants: Array.isArray(product?.variants) ? product.variants.map(buildVariantForm) : [],
@@ -188,6 +238,7 @@ export default function ProductMgmtPage() {
   const [newVariant, setNewVariant] = useState(initialVariant);
   const [newVariantError, setNewVariantError] = useState("");
   const [addingVariant, setAddingVariant] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   const flatCategories = useMemo(() => flattenCategories(categories), [categories]);
 
@@ -296,6 +347,93 @@ export default function ProductMgmtPage() {
     setNewVariant((current) => ({ ...current, [field]: value }));
   };
 
+  const addImage = () => {
+    setForm((current) => ({
+      ...current,
+      images: [
+        ...current.images,
+        {
+          ...initialImage,
+          tempId: `image-${Date.now()}`,
+          isPrimary: current.images.length === 0,
+          sortOrder: current.images.length,
+          isNew: true,
+        },
+      ],
+    }));
+  };
+
+  const reloadImages = async () => {
+    const productId = getId(editingProduct);
+    if (!productId) return;
+
+    setFormError("");
+
+    try {
+      const images = await loadProductImages(productId);
+      setForm((current) => ({ ...current, images, deletedImageIds: [] }));
+    } catch (err) {
+      setFormError(err?.response?.data?.message || err.message || "Không thể tải ảnh sản phẩm từ backend.");
+    }
+  };
+
+  const updateImage = (imageKey, field, value) => {
+    setForm((current) => ({
+      ...current,
+      images: current.images.map((image) =>
+        String(image.id || image.tempId) === String(imageKey)
+          ? { ...image, [field]: field === "sortOrder" ? Number(value || 0) : value }
+          : image,
+      ),
+    }));
+  };
+
+  const updateImageFile = (imageKey, file) => {
+    if (!file) return;
+    const previewUrl = URL.createObjectURL(file);
+
+    setForm((current) => ({
+      ...current,
+      images: current.images.map((image) =>
+        String(image.id || image.tempId) === String(imageKey)
+          ? {
+              ...image,
+              file,
+              imageUrl: previewUrl,
+              previewUrl,
+              isNew: true,
+            }
+          : image,
+      ),
+    }));
+  };
+
+  const setPrimaryImage = (imageKey) => {
+    setForm((current) => ({
+      ...current,
+      images: current.images.map((image) => ({
+        ...image,
+        isPrimary: String(image.id || image.tempId) === String(imageKey),
+      })),
+    }));
+  };
+
+  const removeImage = (imageKey) => {
+    setForm((current) => {
+      const removedImage = current.images.find((image) => String(image.id || image.tempId) === String(imageKey));
+      const nextImages = current.images.filter((image) => String(image.id || image.tempId) !== String(imageKey));
+
+      return {
+        ...current,
+        deletedImageIds: removedImage?.id ? [...current.deletedImageIds, removedImage.id] : current.deletedImageIds,
+        images:
+          nextImages.length > 0 && !nextImages.some((image) => image.isPrimary)
+            ? nextImages.map((image, index) => ({ ...image, isPrimary: index === 0 }))
+            : nextImages,
+      };
+    });
+  };
+
   const handleAddVariant = async () => {
     const validationMessage = validateVariant(newVariant);
     if (validationMessage) {
@@ -337,11 +475,50 @@ export default function ProductMgmtPage() {
     }
   };
 
+const syncProductImages = async (productId, imageForm) => {
+  if (!productId) return;
+
+  await Promise.all(
+    [...new Set(imageForm.deletedImageIds.filter(Boolean))].map((imageId) =>
+      productApi.deleteImage(productId, imageId),
+    ),
+  );
+
+  const imagesToUpload = imageForm.images.filter((image) => image.file);
+  const uploadedImages = await Promise.all(
+    imagesToUpload.map(async (image) => {
+      const uploaded = getItem(
+        await productApi.uploadImage(productId, {
+          file: image.file,
+          isPrimary: image.isPrimary,
+          sortOrder: image.sortOrder,
+        }),
+      );
+      return {
+        formKey: String(image.id || image.tempId),
+        id: getId(uploaded),
+      };
+    }),
+  );
+
+  const primaryImage = imageForm.images.find((image) => image.isPrimary);
+  const primaryKey = primaryImage ? String(primaryImage.id || primaryImage.tempId) : "";
+  const uploadedPrimary = uploadedImages.find((image) => image.formKey === primaryKey);
+  const primaryImageId = primaryImage?.id || uploadedPrimary?.id;
+
+  if (primaryImageId) {
+    await productApi.setPrimaryImage(productId, primaryImageId);
+  }
+};
+
   const validateForm = () => {
     if (modalMode === "edit" && !getId(editingProduct)) return "Không tìm thấy mã sản phẩm để cập nhật.";
     if (!form.name.trim()) return "Vui lòng nhập tên sản phẩm.";
     if (!form.categoryId) return "Vui lòng chọn loại sản phẩm.";
     if (modalMode === "create" && form.variants.length === 0) return "Vui lòng thêm ít nhất một biến thể cho sản phẩm.";
+
+    const emptyNewImage = form.images.find((image) => image.isNew && !image.file);
+    if (emptyNewImage) return "Vui lòng chọn file ảnh hoặc xóa dòng ảnh trống.";
 
     const invalidVariant = form.variants.find(validateVariant);
     if (invalidVariant) return validateVariant(invalidVariant);
@@ -370,6 +547,7 @@ export default function ProductMgmtPage() {
         await Promise.all(
           form.variants.map((variant) => productApi.addVariant(createdProductId, buildVariantPayload(variant))),
         );
+        await syncProductImages(createdProductId, form);
         syncStoredFeaturedProduct(
           { ...createdProduct, slug: createdProduct?.slug || form.slug || generateSlug(form.name) },
           form.featured,
@@ -382,6 +560,7 @@ export default function ProductMgmtPage() {
         await Promise.all(
           existingVariants.map((variant) => productApi.updateVariant(variant.id, buildVariantPayload(variant))),
         );
+        await syncProductImages(productId, form);
         syncStoredFeaturedProduct({ ...editingProduct, slug: form.slug || editingProduct?.slug }, form.featured);
       }
 
@@ -391,6 +570,28 @@ export default function ProductMgmtPage() {
       setFormError(err?.response?.data?.message || err.message || "Không thể lưu sản phẩm.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteProduct = async (product) => {
+    const productId = getId(product);
+    if (!productId) {
+      setError("Không tìm thấy mã sản phẩm để xóa.");
+      return;
+    }
+
+    if (!window.confirm(`Xóa sản phẩm "${product.name}"?`)) return;
+
+    setDeletingId(productId);
+    setError("");
+
+    try {
+      await productApi.delete(productId);
+      await loadProducts();
+    } catch (err) {
+      setError(err?.response?.data?.message || err.message || "Không thể xóa sản phẩm.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -457,8 +658,13 @@ export default function ProductMgmtPage() {
                           <button className={styles.ghostBtn} type="button" onClick={() => openEditModal(product)}>
                             Sửa
                           </button>
-                          <button className={styles.ghostBtn} type="button">
-                            {isActive ? "Ẩn" : "Hiện"}
+                          <button
+                            className={styles.ghostBtn}
+                            type="button"
+                            onClick={() => handleDeleteProduct(product)}
+                            disabled={String(deletingId) === String(getId(product))}
+                          >
+                            Xóa
                           </button>
                         </div>
                       </td>
@@ -523,6 +729,82 @@ export default function ProductMgmtPage() {
             <span>Mô tả</span>
             <textarea value={form.description} onChange={(event) => updateForm("description", event.target.value)} />
           </label>
+
+          <div className={`${styles.fullField} ${styles.imageEditor}`}>
+            <div className={styles.variantHeader}>
+              <span>Hình ảnh sản phẩm</span>
+              <div className={styles.variantHeaderActions}>
+                <small>{form.images.length ? `${form.images.length} ảnh` : "Chưa có ảnh"}</small>
+                {modalMode === "edit" && (
+                  <button type="button" className={styles.ghostBtn} onClick={reloadImages} disabled={saving}>
+                    Tải ảnh
+                  </button>
+                )}
+                <button type="button" className={styles.ghostBtn} onClick={addImage} disabled={saving}>
+                  + Thêm ảnh
+                </button>
+              </div>
+            </div>
+
+            {form.images.length === 0 && (
+              <p className={styles.variantEmpty}>Thêm URL ảnh để hiển thị ở danh sách và trang chi tiết sản phẩm.</p>
+            )}
+
+            {form.images.length > 0 && (
+              <div className={styles.imageList}>
+                {form.images.map((image, index) => {
+                  const imageKey = image.id || image.tempId;
+
+                  return (
+                    <div className={styles.imageRow} key={imageKey || index}>
+                      <div className={styles.imagePreview}>
+                        {image.imageUrl ? <img src={image.imageUrl} alt="" /> : <span>Ảnh</span>}
+                      </div>
+
+                      <label className={`${styles.compactField} ${styles.imageUrlField}`}>
+                        <span>URL ảnh</span>
+                        <input
+                          value={image.imageUrl}
+                          onChange={(event) => updateImage(imageKey, "imageUrl", event.target.value)}
+                          placeholder="https://..."
+                          readOnly
+                        />
+                        <input
+                          accept="image/*"
+                          type="file"
+                          onChange={(event) => updateImageFile(imageKey, event.target.files?.[0])}
+                        />
+                      </label>
+
+                      <label className={styles.compactField}>
+                        <span>Thứ tự</span>
+                        <input
+                          min="0"
+                          type="number"
+                          value={image.sortOrder}
+                          onChange={(event) => updateImage(imageKey, "sortOrder", event.target.value)}
+                        />
+                      </label>
+
+                      <label className={styles.checkboxField}>
+                        <input
+                          type="radio"
+                          name="primaryProductImage"
+                          checked={Boolean(image.isPrimary)}
+                          onChange={() => setPrimaryImage(imageKey)}
+                        />
+                        <span>Ảnh chính</span>
+                      </label>
+
+                      <button className={styles.ghostBtn} type="button" onClick={() => removeImage(imageKey)}>
+                        Xóa
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           <label className={`${styles.checkboxField} ${styles.fullField}`}>
             <input
