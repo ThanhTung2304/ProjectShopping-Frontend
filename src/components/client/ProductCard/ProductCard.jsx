@@ -21,7 +21,9 @@ export default function ProductCard({ product }) {
             }}
           />
         </Link>
-        <button className={styles.quickAdd}>Thêm vào giỏ</button>
+        <Link to={productPath} className={styles.quickAdd}>
+          Xem chi tiết
+        </Link>
       </div>
 
       <div className={styles.info}>

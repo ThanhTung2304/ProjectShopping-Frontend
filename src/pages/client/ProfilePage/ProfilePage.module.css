@@ -309,6 +309,56 @@
   text-align: right;
 }
 
+.orderActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.confirmOrderBtn,
+.cancelOrderBtn {
+  min-height: 34px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0 14px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.confirmOrderBtn {
+  border: 0;
+  background: #111;
+  color: #fff;
+}
+
+.confirmOrderBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+.cancelOrderBtn {
+  border: 1px solid #e5b8b8;
+  background: #fff;
+  color: #c0392b;
+}
+
+.cancelOrderBtn:hover:not(:disabled) {
+  background: #fff5f5;
+  border-color: #c0392b;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(192, 57, 43, 0.12);
+}
+
+.confirmOrderBtn:disabled,
+.cancelOrderBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
 .status {
   display: inline-block;
   margin-bottom: 6px;
@@ -331,7 +381,6 @@
 }
 
 .shipping,
-.processing,
 .confirmed {
   background: #f7f0df;
   color: #9a6a12;
@@ -399,6 +448,15 @@
 
   .orderMeta {
     text-align: left;
+  }
+
+  .orderActions {
+    flex-direction: column;
+  }
+
+  .confirmOrderBtn,
+  .cancelOrderBtn {
+    width: 100%;
   }
 
   .profileNav,

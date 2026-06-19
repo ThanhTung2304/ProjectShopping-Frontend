@@ -123,6 +123,82 @@
   border-bottom: 1px solid #eee;
 }
 
+.tableSubtext {
+  margin: -10px 0 0;
+  color: #777;
+  font-size: 0.86rem;
+}
+
+.filterRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex: 1;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.filterRow .searchInput {
+  width: 260px;
+}
+
+.filterRow .searchInput[type="month"] {
+  width: 170px;
+  flex: 0 0 170px;
+}
+
+.revenueChart {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(54px, 1fr));
+  gap: 12px;
+  min-height: 300px;
+  padding: 22px;
+  overflow-x: auto;
+}
+
+.chartColumn {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-items: end;
+  gap: 10px;
+  min-width: 54px;
+}
+
+.chartValue {
+  color: #555;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+  word-break: break-word;
+}
+
+.chartTrack {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 190px;
+  border-radius: 8px;
+  background: #f6f6f6;
+  padding: 5px;
+}
+
+.chartBar {
+  width: 100%;
+  max-width: 34px;
+  border-radius: 6px 6px 3px 3px;
+  background: linear-gradient(180deg, #111 0%, #c9a96e 100%);
+  transition: height 0.25s ease;
+}
+
+.chartLabel {
+  color: #777;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-align: center;
+}
+
 .searchInput {
   min-height: 40px;
   width: min(280px, 100%);
@@ -234,6 +310,14 @@
 .nameCell {
   color: #111;
   font-weight: 800;
+}
+
+.cellSubtext {
+  display: block;
+  margin-top: 4px;
+  color: #888;
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 
 .muted {
@@ -546,6 +630,74 @@
   border-bottom: 0;
 }
 
+.orderDetail {
+  display: grid;
+  gap: 18px;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detailGrid div,
+.detailBlock {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fbfbfb;
+  padding: 12px;
+}
+
+.detailGrid span,
+.detailBlock > span {
+  display: block;
+  margin-bottom: 6px;
+  color: #777;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.detailGrid strong,
+.detailBlock p {
+  margin: 0;
+  color: #111;
+  line-height: 1.5;
+}
+
+.detailItems {
+  display: grid;
+  gap: 10px;
+}
+
+.detailItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.detailItem:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.detailItem small {
+  display: block;
+  margin-top: 4px;
+  color: #888;
+}
+
+.detailItem > span {
+  flex: 0 0 auto;
+  color: #111;
+  font-weight: 800;
+}
+
 .empty,
 .error,
 .loading {
@@ -572,6 +724,18 @@
     flex-direction: column;
   }
 
+  .filterRow {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .filterRow .searchInput,
+  .filterRow .searchInput[type="month"] {
+    width: 100%;
+    flex: 1 1 180px;
+  }
+
   .statsGrid,
   .contentGrid {
     grid-template-columns: 1fr;
@@ -582,6 +746,10 @@
   }
 
   .variantRow {
+    grid-template-columns: 1fr;
+  }
+
+  .detailGrid {
     grid-template-columns: 1fr;
   }
 

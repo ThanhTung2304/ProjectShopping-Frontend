@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import productApi from "../../../api/productApi";
+import ProductCard from "../../../components/client/ProductCard/ProductCard";
 import useCart from "../../../hooks/useCart";
 import { useAuth } from "../../../hooks/useAuth";
 import {
   formatCurrency,
+  getProductCategoryValues,
   getProductId,
   getProductImage,
   getProductPrice,
@@ -95,6 +97,82 @@ const findProductInList = (products, id) =>
     return keys.includes(String(id));
   });
 
+const getTotalPages = (response) =>
+  Number(
+    response?.totalPages ??
+      response?.data?.totalPages ??
+      response?.page?.totalPages ??
+      response?.data?.page?.totalPages ??
+      1,
+  );
+
+const uniqueProductsByKey = (products) => {
+  const seenKeys = new Set();
+
+  return products.filter((product) => {
+    const key = String(getProductId(product) || product?.slug || product?.name || "");
+    if (!key || seenKeys.has(key)) return false;
+    seenKeys.add(key);
+    return true;
+  });
+};
+
+const fetchAllProducts = async () => {
+  const defaultResponse = await productApi.getAll();
+  const defaultProducts = getResponseList(defaultResponse);
+
+  try {
+    const firstResponse = await productApi.getAll({ page: 0, size: 100 });
+    const firstProducts = getResponseList(firstResponse);
+    const totalPages = getTotalPages(firstResponse);
+
+    if (totalPages <= 1) return uniqueProductsByKey(defaultProducts.concat(firstProducts));
+
+    const pageResponses = await Promise.all(
+      Array.from({ length: totalPages - 1 }, (_, index) => productApi.getAll({ page: index + 1, size: 100 })),
+    );
+    const pagedProducts = pageResponses.reduce(
+      (products, response) => products.concat(getResponseList(response)),
+      firstProducts,
+    );
+
+    return uniqueProductsByKey(defaultProducts.concat(pagedProducts));
+  } catch {
+    return defaultProducts;
+  }
+};
+
+const getRelatedProducts = (products, currentProduct) => {
+  const currentKeys = [currentProduct?.id, currentProduct?._id, currentProduct?.slug].filter(Boolean).map(String);
+  const currentCategories = getProductCategoryValues(currentProduct);
+  const otherProducts = products.filter((item) => {
+    const itemKeys = [item?.id, item?._id, item?.slug].filter(Boolean).map(String);
+    return !itemKeys.some((key) => currentKeys.includes(key));
+  });
+
+  const sameCategoryProducts = otherProducts.filter((item) =>
+    getProductCategoryValues(item).some((category) => currentCategories.includes(category)),
+  );
+  const fallbackProducts = otherProducts.filter((item) => !sameCategoryProducts.includes(item));
+
+  return [...sameCategoryProducts, ...fallbackProducts];
+};
+
+const fetchProductCardDetail = async (product) => {
+  try {
+    const concreteId = getCartProductId(product);
+    const detail = concreteId
+      ? getResponseItem(await productApi.getById(concreteId))
+      : getResponseItem(await productApi.getBySlug(product?.slug || getProductId(product)));
+
+    return detail ? { ...product, ...detail } : product;
+  } catch {
+    return product;
+  }
+};
+
+const hydrateRelatedProducts = async (products) => Promise.all(products.map(fetchProductCardDetail));
+
 const fetchProductDetail = async (routeId, listProduct) => {
   const concreteId = getCartProductId(listProduct);
 
@@ -142,16 +220,21 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [relatedProducts, setRelatedProducts] = useState([]);
 
   useEffect(() => {
+    let isCurrentProduct = true;
+
     const fetchProductDetails = async () => {
+      window.scrollTo({ top: 0, behavior: "auto" });
       setLoading(true);
       setError("");
       setNotice("");
+      setRelatedProducts([]);
 
       try {
-        const listResponse = await productApi.getAll();
-        const listProduct = findProductInList(getResponseList(listResponse), id);
+        const allProducts = await fetchAllProducts();
+        const listProduct = findProductInList(allProducts, id);
         let data = listProduct;
 
         try {
@@ -175,21 +258,34 @@ export default function ProductDetailPage() {
 
         const images = getProductImages(data);
         const firstVariant = getActiveVariants(data)[0];
+        const relatedProductList = getRelatedProducts(allProducts, data);
+
+        if (!isCurrentProduct) return;
 
         setProduct(data);
+        setRelatedProducts(relatedProductList);
         setSelectedImage(images[0]);
         setSelectedSize(firstVariant?.size || getProductSizes(data)[0] || "");
         setSelectedColor(firstVariant?.color || getProductColors(data)[0] || "");
         setQuantity(1);
+
+        void hydrateRelatedProducts(relatedProductList).then((products) => {
+          if (isCurrentProduct) setRelatedProducts(products);
+        });
       } catch (err) {
+        if (!isCurrentProduct) return;
         setError("Đã xảy ra lỗi khi tải chi tiết sản phẩm.");
         console.error("Error fetching product details:", err);
       } finally {
-        setLoading(false);
+        if (isCurrentProduct) setLoading(false);
       }
     };
 
     void fetchProductDetails();
+
+    return () => {
+      isCurrentProduct = false;
+    };
   }, [id]);
 
   const images = useMemo(() => getProductImages(product), [product]);
@@ -287,7 +383,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className={styles.container}>
+    <main className={styles.container}>
       <section className={styles.gallery} aria-label="Hình ảnh sản phẩm">
         <div className={styles.mainImage}>
           <img src={selectedImage || getProductImage(product, FALLBACK_IMAGE)} alt={product.name} />
@@ -450,6 +546,20 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </section>
-    </div>
+
+      {relatedProducts.length > 0 && (
+        <section className={styles.relatedSection} aria-labelledby="related-products-title">
+          <div className={styles.relatedHeader}>
+            <p>Sản phẩm liên quan</p>
+            <h2 id="related-products-title">Có thể bạn cũng thích</h2>
+          </div>
+          <div className={styles.relatedGrid}>
+            {relatedProducts.map((relatedProduct) => (
+              <ProductCard key={getProductId(relatedProduct)} product={relatedProduct} />
+            ))}
+          </div>
+        </section>
+      )}
+    </main>
   );
 }
