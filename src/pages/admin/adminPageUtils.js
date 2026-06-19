@@ -9,6 +9,8 @@ export const getId = (item) =>
 
 export const formatMoney = (value) => formatCurrency(value);
 
+export const LOW_STOCK_THRESHOLD = 20;
+
 export const getVariantPrice = (variant) =>
   Number(variant?.salePrice ?? variant?.sale_price ?? variant?.price ?? 0);
 
@@ -89,6 +91,11 @@ export const getProductStock = (product) => {
 export const formatStock = (product) => {
   const stock = getProductStock(product);
   return stock === null ? "Không có dữ liệu" : stock;
+};
+
+export const isLowStock = (product) => {
+  const stock = getProductStock(product);
+  return stock !== null && stock < LOW_STOCK_THRESHOLD;
 };
 
 export { isAdminRole, isAdminUser, normalizeRole };

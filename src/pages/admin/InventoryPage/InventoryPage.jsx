@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import productApi from "../../../api/productApi";
-import { formatStock, getId, getList, getProductStock, safeText } from "../adminPageUtils";
+import { formatStock, getId, getList, getProductStock, isLowStock, safeText } from "../adminPageUtils";
 import styles from "../AdminPages.module.css";
 
 const fetchProductVariants = async (product) => {
@@ -61,10 +61,7 @@ export default function InventoryPage() {
   }, []);
 
   const lowStockProducts = useMemo(
-    () => products.filter((product) => {
-      const stock = getProductStock(product);
-      return stock !== null && stock <= 5;
-    }),
+    () => products.filter(isLowStock),
     [products],
   );
 
@@ -118,8 +115,8 @@ export default function InventoryPage() {
                         <td>{safeText(product.categoryName || product.category?.name)}</td>
                         <td>{formatStock(product)}</td>
                         <td>
-                          <span className={`${styles.status} ${stock !== null && stock <= 5 ? styles.statusDanger : styles.statusSuccess}`}>
-                            {stock === null ? "Không có dữ liệu" : stock <= 5 ? "Cần nhập thêm" : "Ổn định"}
+                          <span className={`${styles.status} ${isLowStock(product) ? styles.statusDanger : styles.statusSuccess}`}>
+                            {stock === null ? "Không có dữ liệu" : isLowStock(product) ? "Cần nhập thêm" : "Ổn định"}
                           </span>
                         </td>
                       </tr>

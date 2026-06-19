@@ -12,7 +12,7 @@ const productApi = {
   // GET /api/products/id/{id}
   getById: (id) => axiosClient.get(`/api/products/id/${id}`),
 
-  // GET /api/products/{productId}/variants
+  // GET /api/products/{productId}/variants (dùng slug hoặc id dạng số)
   getVariants: (productId) =>
     axiosClient.get(`/api/products/${productId}/variants`),
 
@@ -20,24 +20,20 @@ const productApi = {
   getVariantsById: (productId) =>
     axiosClient.get(`/api/products/id/${productId}/variants`),
 
-  // Nếu backend chưa có API này thì có thể bỏ
-  getAllVariants: (params) =>
-    axiosClient.get("/api/product-variants", { params }),
-
   // ===== ADMIN PRODUCT =====
-  // Backend của bạn vẫn dùng /api/products
-  // Phân quyền admin nằm ở @PreAuthorize("hasRole('ADMIN')")
+  // Đúng path: /api/products (không phải /api/admin/products)
 
   // POST /api/products
-  create: (data) => axiosClient.post("/api/admin/products", data),
+  create: (data) => axiosClient.post("/api/products", data),
 
   // PUT /api/products/{id}
-  update: (id, data) => axiosClient.put(`/api/admin/products/${id}`, data),
+  update: (id, data) => axiosClient.put(`/api/products/${id}`, data),
 
   // DELETE /api/products/{id}
-  delete: (id) => axiosClient.delete(`/api/admin/products/${id}`),
+  delete: (id) => axiosClient.delete(`/api/products/${id}`),
 
   // ===== ADMIN PRODUCT IMAGE =====
+  // Đúng path: /api/admin/products (AdminProductController dùng prefix này)
 
   // POST /api/admin/products/{productId}/images
   uploadImage: (productId, { file, isPrimary = false, sortOrder = 0 }) => {
@@ -52,7 +48,8 @@ const productApi = {
   },
 
   // GET /api/admin/products/{productId}/images
-  getImages: (productId) => axiosClient.get(`/api/admin/products/${productId}/images`),
+  getImages: (productId) =>
+    axiosClient.get(`/api/admin/products/${productId}/images`),
 
   // PUT /api/admin/products/{productId}/images/{imageId}/primary
   setPrimaryImage: (productId, imageId) =>
@@ -64,17 +61,17 @@ const productApi = {
 
   // ===== ADMIN VARIANT =====
 
-  // POST /api/products/{productId}/variants
+  // POST /api/products/id/{productId}/variants
   addVariant: (productId, data) =>
-    axiosClient.post(`/api/admin/products/id/${productId}/variants`, data),
+    axiosClient.post(`/api/products/id/${productId}/variants`, data),
 
   // PUT /api/products/variants/{variantId}
   updateVariant: (variantId, data) =>
-    axiosClient.put(`/api/admin/products/variants/${variantId}`, data),
+    axiosClient.put(`/api/products/variants/${variantId}`, data),
 
   // DELETE /api/products/variants/{variantId}
   deleteVariant: (variantId) =>
-    axiosClient.delete(`/api/admin/products/variants/${variantId}`),
+    axiosClient.delete(`/api/products/variants/${variantId}`),
 };
 
 export default productApi;

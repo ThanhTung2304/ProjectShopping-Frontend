@@ -9,25 +9,24 @@
 }
 
 .gallery {
-  position: sticky;
-  top: 110px;
-  width: min(100%, 520px);
+  width: 100%;
+  max-width: 760px;
 }
 
 .mainImage {
   position: relative;
   overflow: hidden;
-  border-radius: 8px;
+  aspect-ratio: 5 / 4;
+  border-radius: 14px;
   background: #f7f7f7;
   box-shadow: var(--shadow-soft);
 }
 
 .mainImage img {
   width: 100%;
-  aspect-ratio: 3 / 4;
-  max-height: min(68vh, 680px);
+  height: 100%;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .soldOutBadge {
@@ -54,7 +53,7 @@
 .thumbBtn {
   padding: 0;
   border: 1px solid #eee;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #fff;
   cursor: pointer;
   overflow: hidden;
@@ -69,9 +68,10 @@
 
 .thumbBtn img {
   width: 100%;
+  height: 100%;
   aspect-ratio: 3 / 4;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .details {
@@ -376,6 +376,43 @@
   font-weight: 800;
 }
 
+.relatedSection {
+  grid-column: 1 / -1;
+  margin-top: clamp(24px, 4vw, 48px);
+  padding-top: clamp(36px, 5vw, 64px);
+  border-top: 1px solid #eee;
+}
+
+.relatedHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.relatedHeader p {
+  margin: 0 0 8px;
+  color: #c9a96e;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+
+.relatedHeader h2 {
+  margin: 0;
+  color: #111;
+  font-size: clamp(1.55rem, 3vw, 2.4rem);
+  line-height: 1.1;
+}
+
+.relatedGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 26px 20px;
+}
+
 @media (max-width: 900px) {
   .container {
     grid-template-columns: 1fr;
@@ -385,6 +422,10 @@
 
   .gallery {
     position: static;
+  }
+
+  .relatedGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -420,5 +461,22 @@
 
   .thumbnails {
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  .relatedHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .relatedGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .relatedGrid {
+    grid-template-columns: 1fr;
   }
 }

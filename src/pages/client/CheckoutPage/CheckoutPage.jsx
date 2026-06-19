@@ -3,20 +3,17 @@ import { useNavigate } from "react-router-dom";
 import addressApi from "../../../api/addressApi";
 import couponApi from "../../../api/couponApi";
 import orderApi from "../../../api/orderApi";
-import userApi from "../../../api/userApi";
+// import userApi from "../../../api/userApi";
 import { CartContext } from "../../../context/cartContextValue";
 import { formatCurrency, getResponseList } from "../../../utils/productUtils";
 import styles from "./CheckoutPage.module.css";
 
+// ===== COUPON HELPERS =====
 const getCouponId = (coupon) => coupon?.id || coupon?._id || coupon?.couponId || coupon?.coupon_id;
-
 const getCouponCode = (coupon) => coupon?.code || coupon?.couponCode || coupon?.name || "";
-
 const getCouponDiscountType = (coupon) => String(coupon?.discountType || coupon?.type || "").toUpperCase();
-
 const getCouponDiscountValue = (coupon) =>
   Number(coupon?.discountValue ?? coupon?.value ?? coupon?.amount ?? coupon?.discount ?? 0);
-
 const getCouponMinOrder = (coupon) =>
   Number(
     coupon?.minOrderAmount ??
@@ -26,22 +23,18 @@ const getCouponMinOrder = (coupon) =>
       coupon?.minPurchaseAmount ??
       0,
   );
-
 const getCouponMaxDiscount = (coupon) =>
   Number(coupon?.maxDiscountAmount ?? coupon?.maximumDiscountAmount ?? coupon?.maxDiscount ?? 0);
-
-const getCouponEndDate = (coupon) => coupon?.endDate || coupon?.expiredAt || coupon?.expiryDate || coupon?.validUntil;
+const getCouponEndDate = (coupon) =>
+  coupon?.endDate || coupon?.expiredAt || coupon?.expiryDate || coupon?.validUntil;
 
 const isCouponActive = (coupon) => {
   const status = String(coupon?.status || "").toUpperCase();
   const endDate = getCouponEndDate(coupon);
-
   if (status === "INACTIVE" || status === "EXPIRED" || coupon?.active === false || coupon?.enabled === false) {
     return false;
   }
-
   if (!endDate) return true;
-
   const expiredAt = new Date(endDate);
   return Number.isNaN(expiredAt.getTime()) || expiredAt.getTime() >= Date.now();
 };
@@ -49,18 +42,15 @@ const isCouponActive = (coupon) => {
 const isPercentCoupon = (coupon) => {
   const type = getCouponDiscountType(coupon);
   const value = getCouponDiscountValue(coupon);
-
   return type.includes("PERCENT") || (!type && value > 0 && value <= 100);
 };
 
 const calculateCouponDiscount = (coupon, amount) => {
   if (!coupon || amount < getCouponMinOrder(coupon)) return 0;
-
   const value = getCouponDiscountValue(coupon);
   const rawDiscount = isPercentCoupon(coupon) ? (amount * value) / 100 : value;
   const maxDiscount = getCouponMaxDiscount(coupon);
   const cappedDiscount = maxDiscount > 0 ? Math.min(rawDiscount, maxDiscount) : rawDiscount;
-
   return Math.min(Math.max(cappedDiscount, 0), amount);
 };
 
@@ -69,10 +59,10 @@ const getCouponLabel = (coupon) => {
   const discount = isPercentCoupon(coupon) ? `${value}%` : formatCurrency(value);
   const minOrder = getCouponMinOrder(coupon);
   const minOrderText = minOrder > 0 ? ` - đơn từ ${formatCurrency(minOrder)}` : "";
-
   return `${getCouponCode(coupon)} - Giảm ${discount}${minOrderText}`;
 };
 
+// ===== ADDRESS HELPERS =====
 const getAddressList = (response) => {
   if (Array.isArray(response)) return response;
   if (Array.isArray(response?.data)) return response.data;
@@ -97,7 +87,6 @@ const getDefaultAddress = (addresses) => addresses.find(isDefaultAddress) || add
 
 const joinUniqueAddressParts = (parts) => {
   const seen = new Set();
-
   return parts
     .flatMap((part) => String(part || "").split(","))
     .map((part) => part.trim())
@@ -113,8 +102,8 @@ const joinUniqueAddressParts = (parts) => {
 
 const formatShippingAddress = (address) => {
   if (!address) return "";
-
   const structuredAddress = joinUniqueAddressParts([
+    address.detail,
     address.ward,
     address.wardName,
     address.district,
@@ -124,70 +113,58 @@ const formatShippingAddress = (address) => {
     address.province,
     address.provinceName,
   ]);
-
   if (structuredAddress) return structuredAddress;
-
   const fullAddress =
-    address.fullAddress ||
-    address.full_address ||
-    address.address ||
-    address.addressLine ||
-    address.address_line;
-
+    address.fullAddress || address.full_address || address.address || address.addressLine || address.address_line;
   return joinUniqueAddressParts([fullAddress]);
 };
 
+// ===== COMPONENT =====
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { cartItems, subtotal, fetchCart } = useContext(CartContext);
+
   const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    address: "",
     note: "",
-    paymentMethod: "cod",
+    paymentMethod: "COD",
   });
+
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [addressLoading, setAddressLoading] = useState(true);
+
   const [coupons, setCoupons] = useState([]);
   const [selectedCouponCode, setSelectedCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(true);
   const [couponError, setCouponError] = useState("");
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  // Fetch addresses + profile
   useEffect(() => {
-    const fetchCheckoutProfile = async () => {
+    const fetchData = async () => {
+      setAddressLoading(true);
       try {
-        const [profileResult, addressesResult] = await Promise.allSettled([
-          userApi.getMe(),
-          addressApi.getMine(),
-        ]);
-
-        const profileResponse = profileResult.status === "fulfilled" ? profileResult.value : null;
-        const profile = profileResponse?.data || profileResponse?.user || profileResponse;
-        const addresses = addressesResult.status === "fulfilled" ? getAddressList(addressesResult.value) : [];
-        const defaultAddress = formatShippingAddress(getDefaultAddress(addresses));
-
-        setForm((current) => ({
-          ...current,
-          fullName: current.fullName || profile?.fullName || profile?.name || "",
-          email: current.email || profile?.email || "",
-          phone: current.phone || profile?.phone || "",
-          address: current.address || defaultAddress || joinUniqueAddressParts([profile?.address]) || "",
-        }));
+        const addressesResult = await addressApi.getMine();
+        const addressList = getAddressList(addressesResult);
+        setAddresses(addressList);
+        const defaultAddr = getDefaultAddress(addressList);
+        if (defaultAddr?.id) setSelectedAddressId(defaultAddr.id);
       } catch {
-        // Keep the checkout form editable even when account data is unavailable.
+        setAddresses([]);
+      } finally {
+        setAddressLoading(false);
       }
     };
-
-    void fetchCheckoutProfile();
+    void fetchData();
   }, []);
 
+  // Fetch coupons
   useEffect(() => {
     const fetchCoupons = async () => {
       setCouponLoading(true);
       setCouponError("");
-
       try {
         const response = await couponApi.getAvailable();
         setCoupons(getResponseList(response).filter(isCouponActive));
@@ -198,7 +175,6 @@ export default function CheckoutPage() {
         setCouponLoading(false);
       }
     };
-
     void fetchCoupons();
   }, []);
 
@@ -211,6 +187,7 @@ export default function CheckoutPage() {
     () => calculateCouponDiscount(selectedCoupon, subtotal),
     [selectedCoupon, subtotal],
   );
+
   const finalTotal = Math.max(subtotal - couponDiscount, 0);
 
   const handleChange = (e) => {
@@ -220,8 +197,14 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (cartItems.length === 0) {
       setError("Giỏ hàng đang trống.");
+      return;
+    }
+
+    if (!selectedAddressId) {
+      setError("Vui lòng chọn địa chỉ giao hàng.");
       return;
     }
 
@@ -230,34 +213,24 @@ export default function CheckoutPage() {
 
     try {
       const payload = {
-        customer: {
-          fullName: form.fullName.trim(),
-          email: form.email.trim(),
-          phone: form.phone.trim(),
-        },
-        shippingAddress: form.address.trim(),
-        note: form.note.trim(),
+        addressId: selectedAddressId,
         paymentMethod: form.paymentMethod,
-        couponId: getCouponId(selectedCoupon) || undefined,
         couponCode: getCouponCode(selectedCoupon) || undefined,
-        subtotal,
-        discountAmount: couponDiscount,
-        items: cartItems.map((item) => ({
-          productId: item.productId,
-          productVariantId: item.productVariantId || item.variantId,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-        total: finalTotal,
+        note: form.note.trim() || undefined,
       };
 
       const res = await orderApi.create(payload);
-      if (!res.success) throw new Error(res.message || "Đặt hàng thất bại.");
+      if (res?.data?.success === false) throw new Error(res.data.message || "Đặt hàng thất bại.");
 
       await fetchCart();
       navigate("/home");
     } catch (err) {
-      setError(err.message || "Không thể đặt hàng. Vui lòng thử lại.");
+      setError(
+        err.response?.data?.message ||
+        err.response?.data?.errors?.addressId ||
+        err.message ||
+        "Không thể đặt hàng. Vui lòng thử lại.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -268,25 +241,69 @@ export default function CheckoutPage() {
       <div className={styles.formSide}>
         <h2>Thông tin giao hàng</h2>
         <form id="checkout-form" className={styles.form} onSubmit={handleSubmit}>
-          <input name="fullName" type="text" placeholder="Họ và tên" value={form.fullName} onChange={handleChange} required />
-          <div className={styles.row}>
-            <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required />
-            <input name="phone" type="tel" placeholder="Số điện thoại" value={form.phone} onChange={handleChange} required />
-          </div>
-          <input name="address" type="text" placeholder="Địa chỉ chi tiết" value={form.address} onChange={handleChange} required />
-          <textarea name="note" placeholder="Ghi chú đơn hàng (tùy chọn)" rows="4" value={form.note} onChange={handleChange}></textarea>
 
+          {/* Chọn địa chỉ giao hàng */}
+          <div className={styles.fieldGroup}>
+            <label htmlFor="address-select">Địa chỉ giao hàng</label>
+            {addressLoading ? (
+              <p>Đang tải địa chỉ...</p>
+            ) : addresses.length === 0 ? (
+              <p className={styles.error}>
+                Bạn chưa có địa chỉ nào.{" "}
+                <a href="/account/addresses">Thêm địa chỉ</a>
+              </p>
+            ) : (
+              <select
+                id="address-select"
+                value={selectedAddressId || ""}
+                onChange={(e) => setSelectedAddressId(Number(e.target.value))}
+                required
+              >
+                <option value="">-- Chọn địa chỉ giao hàng --</option>
+                {addresses.map((addr) => (
+                  <option key={addr.id} value={addr.id}>
+                    {formatShippingAddress(addr)}
+                    {isDefaultAddress(addr) ? " (Mặc định)" : ""}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          {/* Ghi chú */}
+          <textarea
+            name="note"
+            placeholder="Ghi chú đơn hàng (tùy chọn)"
+            rows="4"
+            value={form.note}
+            onChange={handleChange}
+          />
+
+          {/* Phương thức thanh toán */}
           <h2 style={{ marginTop: "40px" }}>Phương thức thanh toán</h2>
           <div className={styles.paymentMethods}>
             <label className={styles.method}>
-              <input type="radio" name="paymentMethod" value="cod" checked={form.paymentMethod === "cod"} onChange={handleChange} />
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="COD"
+                checked={form.paymentMethod === "COD"}
+                onChange={handleChange}
+              />
               <span>Thanh toán khi nhận hàng (COD)</span>
             </label>
             <label className={styles.method}>
-              <input type="radio" name="paymentMethod" value="bank_transfer" checked={form.paymentMethod === "bank_transfer"} onChange={handleChange} />
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="BANK_TRANSFER"
+                checked={form.paymentMethod === "BANK_TRANSFER"}
+                onChange={handleChange}
+              />
               <span>Chuyển khoản ngân hàng</span>
             </label>
           </div>
+
           {error && <p className={styles.error}>{error}</p>}
         </form>
       </div>
@@ -294,6 +311,7 @@ export default function CheckoutPage() {
       <div className={styles.orderSide}>
         <div className={styles.orderSummary}>
           <h3>Đơn hàng của bạn</h3>
+
           {cartItems.map((item) => (
             <div key={item.id} className={styles.itemRow}>
               <span>{item.name} x {item.quantity}</span>
@@ -301,19 +319,19 @@ export default function CheckoutPage() {
             </div>
           ))}
 
+          {/* Mã giảm giá */}
           <div className={styles.couponBox}>
             <label htmlFor="checkout-coupon">Mã giảm giá</label>
             <select
               id="checkout-coupon"
               value={selectedCouponCode}
-              onChange={(event) => setSelectedCouponCode(event.target.value)}
+              onChange={(e) => setSelectedCouponCode(e.target.value)}
               disabled={couponLoading || coupons.length === 0}
             >
               <option value="">{couponLoading ? "Đang tải mã..." : "Không dùng mã"}</option>
               {coupons.map((coupon) => {
                 const code = getCouponCode(coupon);
                 const disabled = subtotal < getCouponMinOrder(coupon);
-
                 return (
                   <option key={getCouponId(coupon) || code} value={code} disabled={disabled}>
                     {getCouponLabel(coupon)}
@@ -321,10 +339,13 @@ export default function CheckoutPage() {
                 );
               })}
             </select>
-            {couponError && <p>{couponError}</p>}
-            {selectedCoupon && couponDiscount > 0 && <p>Đã áp dụng mã {getCouponCode(selectedCoupon)}.</p>}
+            {couponError && <p className={styles.error}>{couponError}</p>}
+            {selectedCoupon && couponDiscount > 0 && (
+              <p>Đã áp dụng mã {getCouponCode(selectedCoupon)}.</p>
+            )}
           </div>
 
+          {/* Tổng tiền */}
           <div className={styles.priceRows}>
             <div className={styles.summaryRow}>
               <span>Tạm tính</span>
@@ -340,7 +361,13 @@ export default function CheckoutPage() {
             <span>Tổng thanh toán</span>
             <span className={styles.totalPrice}>{formatCurrency(finalTotal)}</span>
           </div>
-          <button className={styles.placeOrderBtn} type="submit" form="checkout-form" disabled={submitting || cartItems.length === 0}>
+
+          <button
+            className={styles.placeOrderBtn}
+            type="submit"
+            form="checkout-form"
+            disabled={submitting || cartItems.length === 0 || !selectedAddressId}
+          >
             {submitting ? "ĐANG ĐẶT HÀNG..." : "ĐẶT HÀNG NGAY"}
           </button>
         </div>
