@@ -15,6 +15,11 @@ const userApi = {
   adminGetAll: () => axiosClient.get("/api/admin/users"),
   adminGetById: (id) => axiosClient.get(`/api/admin/users/${id}`),
   adminUpdate: (id, data) => axiosClient.put(`/api/admin/users/${id}`, data),
+  adminChangePassword: (id, password) =>
+    axiosClient.patch(`/api/admin/users/${id}/password`, {
+      password,
+      newPassword: password,
+    }),
   adminUpdateStatus: (id, status) =>
     axiosClient.patch(`/api/admin/users/${id}/status`, { status }),
   adminUpdateRole: (id, role) =>

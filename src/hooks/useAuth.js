@@ -19,7 +19,10 @@ export function useAuth() {
       const res = await authApi.login({ email, password });
       if (!res.success) throw new Error(res.message || "Đăng nhập thất bại");
 
-      localStorage.setItem("token", res.data.token);
+      sessionStorage.setItem("token", res.data.token);
+      if (res.data.refreshToken) {
+        sessionStorage.setItem("refreshToken", res.data.refreshToken);
+      }
       context.login(res.data.user);
       return res;
     } catch (err) {
@@ -39,7 +42,10 @@ export function useAuth() {
       if (!res.success) throw new Error(res.message || "Đăng ký thất bại");
 
       if (res.data?.token) {
-        localStorage.setItem("token", res.data.token);
+        sessionStorage.setItem("token", res.data.token);
+        if (res.data.refreshToken) {
+          sessionStorage.setItem("refreshToken", res.data.refreshToken);
+        }
         context.login(res.data.user);
       }
 
@@ -52,7 +58,7 @@ export function useAuth() {
     }
   };
 
-  const getToken = () => localStorage.getItem("token");
+  const getToken = () => sessionStorage.getItem("token");
 
   return {
     ...context,

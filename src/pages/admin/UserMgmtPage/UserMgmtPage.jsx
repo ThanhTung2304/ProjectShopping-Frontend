@@ -45,6 +45,8 @@ export default function UserMgmtPage() {
     phone: "",
     role: "CUSTOMER",
     status: "ACTIVE",
+    password: "",
+    confirmPassword: "",
   });
   const [editError, setEditError] = useState("");
   const [deletingUser, setDeletingUser] = useState(null);
@@ -112,6 +114,8 @@ export default function UserMgmtPage() {
       phone: user?.phone || "",
       role: getUserRole(user).toUpperCase(),
       status: getUserStatusValue(user),
+      password: "",
+      confirmPassword: "",
     });
   };
 
@@ -135,6 +139,16 @@ export default function UserMgmtPage() {
       return;
     }
 
+    if (editForm.password && editForm.password.length < 6) {
+      setEditError("Mật khẩu mới phải có ít nhất 6 ký tự.");
+      return;
+    }
+
+    if (editForm.password !== editForm.confirmPassword) {
+      setEditError("Mật khẩu xác nhận không khớp.");
+      return;
+    }
+
     const payload = {
       fullName: editForm.fullName.trim(),
       email: editForm.email.trim(),
@@ -147,10 +161,18 @@ export default function UserMgmtPage() {
     setEditError("");
     try {
       await userApi.adminUpdate(id, payload);
+      if (editForm.password) {
+        await userApi.adminChangePassword(id, editForm.password);
+      }
       await fetchUsers();
       setEditingUser(null);
     } catch (err) {
-      setEditError(err.response?.data?.message || err.message || "Không thể cập nhật tài khoản.");
+      const status = err.response?.status;
+      const fallbackMessage =
+        editForm.password && (status === 404 || status === 405)
+          ? "Backend chưa hỗ trợ API admin đổi mật khẩu: PATCH /api/admin/users/{id}/password."
+          : "Không thể cập nhật tài khoản.";
+      setEditError(err.response?.data?.message || err.message || fallbackMessage);
     } finally {
       setUpdatingId(null);
     }
@@ -196,7 +218,7 @@ export default function UserMgmtPage() {
         <div>
           <p className={styles.eyebrow}>Users</p>
           <h1>Quản lý tài khoản</h1>
-          <p>Theo dõi tài khoản khách hàng, trạng thái hoạt động và phân quyền.</p>
+          <p>Theo dõi tài khoản, trạng thái hoạt động và phân quyền.</p>
         </div>
         <button className={styles.primaryBtn} type="button" onClick={fetchUsers}>
           Làm mới
@@ -339,6 +361,39 @@ export default function UserMgmtPage() {
               <option value="BLOCKED">Bị khóa</option>
             </select>
           </label>
+
+          <div className={`${styles.fullField} ${styles.formSection}`}>
+            <div className={styles.formSectionHeader}>
+              <strong>Đổi mật khẩu</strong>
+              <span>Để trống nếu bạn không muốn thay đổi mật khẩu.</span>
+            </div>
+
+            <div className={styles.formSectionGrid}>
+              <label className={styles.field}>
+                Mật khẩu mới
+                <input
+                  name="password"
+                  type="password"
+                  value={editForm.password}
+                  onChange={handleEditChange}
+                  placeholder="Tối thiểu 6 ký tự"
+                  autoComplete="new-password"
+                />
+              </label>
+
+              <label className={styles.field}>
+                Xác nhận mật khẩu
+                <input
+                  name="confirmPassword"
+                  type="password"
+                  value={editForm.confirmPassword}
+                  onChange={handleEditChange}
+                  placeholder="Nhập lại mật khẩu mới"
+                  autoComplete="new-password"
+                />
+              </label>
+            </div>
+          </div>
         </form>
       </Modal>
 
@@ -366,5 +421,3 @@ export default function UserMgmtPage() {
     </section>
   );
 }
-
-

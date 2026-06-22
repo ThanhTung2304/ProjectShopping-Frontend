@@ -8,6 +8,14 @@ const categoryApi = {
   adminGetById: (id) => axiosClient.get(`/api/admin/categories/${id}`),
   create: (data) => axiosClient.post("/api/admin/categories", data),
   update: (id, data) => axiosClient.put(`/api/admin/categories/${id}`, data),
+  uploadImage: (id, file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return axiosClient.post(`/api/admin/categories/${id}/image`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
   delete: (id) => axiosClient.delete(`/api/admin/categories/${id}`),
 
   // Admin - old route aliases

@@ -32,8 +32,6 @@ const getFeaturedProductKeys = (product) =>
 const hydrateProductsWithImages = async (items) =>
   Promise.all(
     items.map(async (product) => {
-      if (Array.isArray(product?.images) && product.images.length > 0) return product;
-
       try {
         const detail = getResponseItem(await productApi.getById(getProductId(product)));
         return detail ? { ...product, ...detail } : product;
@@ -59,15 +57,27 @@ export default function HomePage() {
         // Giả định backend hỗ trợ filter theo 'featured=true'
         const response = await productApi.getAll({ featured: true, limit: 4 }); // Lấy 4 sản phẩm nổi bật
         
-        const data = getResponseList(response);
+        let data = getResponseList(response);
+        if (data.length === 0) {
+          data = getResponseList(await productApi.getAll());
+        }
         if (Array.isArray(data)) {
+          const hydratedProducts = await hydrateProductsWithImages(data);
           const storedFeaturedIds = getStoredFeaturedProductIds();
-          const featuredOnly = data.filter((product) => {
+          let featuredOnly = hydratedProducts.filter((product) => {
             const productKeys = getFeaturedProductKeys(product);
             return isFeaturedProduct(product) || productKeys.some((key) => storedFeaturedIds.includes(key));
           });
 
-          setFeaturedProducts(await hydrateProductsWithImages(featuredOnly.slice(0, 4)));
+          if (featuredOnly.length === 0) {
+            const allProducts = await hydrateProductsWithImages(getResponseList(await productApi.getAll()));
+            featuredOnly = allProducts.filter((product) => {
+              const productKeys = getFeaturedProductKeys(product);
+              return isFeaturedProduct(product) || productKeys.some((key) => storedFeaturedIds.includes(key));
+            });
+          }
+
+          setFeaturedProducts(featuredOnly.slice(0, 4));
         } else {
           setError(response.message || "Không thể tải sản phẩm nổi bật.");
         }

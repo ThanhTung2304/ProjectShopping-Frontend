@@ -94,7 +94,7 @@ const saveStoredFeaturedProductIds = (ids) => {
 };
 
 const syncStoredFeaturedProduct = (product, isFeatured) => {
-  const keys = [getId(product), product?.slug].filter(Boolean).map(String);
+  const keys = [getId(product), product?.slug, product?.previousSlug].filter(Boolean).map(String);
   if (keys.length === 0) return;
 
   const currentIds = getStoredFeaturedProductIds();
@@ -103,6 +103,14 @@ const syncStoredFeaturedProduct = (product, isFeatured) => {
     : currentIds.filter((id) => !keys.includes(String(id)));
 
   saveStoredFeaturedProductIds(nextIds);
+};
+
+const isStoredFeaturedProduct = (product) => {
+  const keys = [getId(product), product?.slug].filter(Boolean).map(String);
+  if (keys.length === 0) return false;
+
+  const storedIds = getStoredFeaturedProductIds().map(String);
+  return keys.some((key) => storedIds.includes(key));
 };
 
 const flattenCategories = (items = []) =>
@@ -125,7 +133,8 @@ const getCategoryId = (product, categories = []) =>
 const getActiveValue = (item) => item?.isActive ?? item?.is_active ?? item?.active ?? true;
 
 const getFeaturedValue = (product) =>
-  product?.featured ?? product?.isFeatured ?? product?.is_featured ?? product?.bestSeller ?? false;
+  Boolean(product?.featured ?? product?.isFeatured ?? product?.is_featured ?? product?.bestSeller ?? false) ||
+  isStoredFeaturedProduct(product);
 
 const getImageUrl = (image) => {
   if (!image) return "";
@@ -561,7 +570,14 @@ const syncProductImages = async (productId, imageForm) => {
           existingVariants.map((variant) => productApi.updateVariant(variant.id, buildVariantPayload(variant))),
         );
         await syncProductImages(productId, form);
-        syncStoredFeaturedProduct({ ...editingProduct, slug: form.slug || editingProduct?.slug }, form.featured);
+        syncStoredFeaturedProduct(
+          {
+            ...editingProduct,
+            slug: form.slug || editingProduct?.slug,
+            previousSlug: editingProduct?.slug,
+          },
+          form.featured,
+        );
       }
 
       await loadProducts();

@@ -6,8 +6,9 @@ import styles from "./AdminHeader.module.css";
 const titleByPath = {
   "/admin/dashboard": "Bảng điều khiển",
   "/admin/products": "Sản phẩm",
+  "/admin/categories": "Danh mục",
   "/admin/orders": "Đơn hàng",
-  "/admin/users": "Khách hàng",
+  "/admin/users": "Tài khoản",
   "/admin/inventory": "Kho hàng",
   "/admin/coupons": "Ưu đãi",
 };
