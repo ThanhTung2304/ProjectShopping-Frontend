@@ -9,7 +9,7 @@ const LOCAL_CART_KEY = "fashion_shop_local_cart";
 
 const getLocalCart = () => {
   try {
-    const items = JSON.parse(localStorage.getItem(LOCAL_CART_KEY) || "[]");
+    const items = JSON.parse(sessionStorage.getItem(LOCAL_CART_KEY) || "[]");
     return Array.isArray(items) ? items : [];
   } catch {
     return [];
@@ -17,7 +17,7 @@ const getLocalCart = () => {
 };
 
 const saveLocalCart = (items) => {
-  localStorage.setItem(LOCAL_CART_KEY, JSON.stringify(items));
+  sessionStorage.setItem(LOCAL_CART_KEY, JSON.stringify(items));
 };
 
 const getCartItemImage = (item, product) => {

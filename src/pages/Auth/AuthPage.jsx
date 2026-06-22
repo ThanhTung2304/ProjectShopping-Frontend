@@ -5,6 +5,8 @@ import authApi from "../../api/authApi";
 import { AuthContext } from "../../context/authContextValue";
 import { buildAuthUser, isAdminUser } from "../../utils/authUtils";
 
+const getErrorMessage = (err, fallback) => err?.response?.data?.message || err?.message || fallback;
+
 export default function AuthPage() {
   const navigate = useNavigate();
   const { login: setAuthUser } = useContext(AuthContext);
@@ -33,8 +35,6 @@ export default function AuthPage() {
     setTimeout(() => setToast({ show: false, message: "" }), 2500);
   };
 
-  const getErrorMessage = (err, fallback) => err?.response?.data?.message || err?.message || fallback;
-
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!loginForm.email || !loginForm.password) {
@@ -47,7 +47,10 @@ export default function AuthPage() {
       const res = await authApi.login({ email: loginForm.email, password: loginForm.password });
       if (!res.success) throw new Error(res.message || "Sai email hoặc mật khẩu");
 
-      localStorage.setItem("token", res.data.token);
+      sessionStorage.setItem("token", res.data.token);
+      if (res.data.refreshToken) {
+        sessionStorage.setItem("refreshToken", res.data.refreshToken);
+      }
       const loggedInUser = buildAuthUser(res.data);
       setAuthUser(loggedInUser);
       showToast("Đăng nhập thành công");
@@ -80,7 +83,10 @@ export default function AuthPage() {
       });
       if (!res.success) throw new Error(res.message || "Đăng ký thất bại");
 
-      localStorage.setItem("token", res.data.token);
+      sessionStorage.setItem("token", res.data.token);
+      if (res.data.refreshToken) {
+        sessionStorage.setItem("refreshToken", res.data.refreshToken);
+      }
       const registeredUser = buildAuthUser(res.data);
       if (registeredUser) setAuthUser(registeredUser);
       showToast("Đăng ký thành công");
@@ -296,16 +302,6 @@ export default function AuthPage() {
 
               <button type="submit" className={styles.btnPrimary} disabled={isSubmitting}>
                 {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
-              </button>
-
-              <div className={styles.divider}>
-                <span className={styles.dividerLine} />
-                <span className={styles.dividerText}>hoặc</span>
-                <span className={styles.dividerLine} />
-              </div>
-
-              <button type="button" className={styles.btnGoogle}>
-                Tiếp tục với Google
               </button>
 
               <p className={styles.termsNote}>

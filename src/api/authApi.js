@@ -7,4 +7,10 @@ const authApi = {
   resetPassword: (data) => axiosClient.post("/api/auth/reset-password", data),
 };
 
+export const refreshTokenApi = (refreshToken) =>
+  axiosClient.post('/auth/refresh-token', { refreshToken });
+
+export const logoutApi = (refreshToken) =>
+  axiosClient.post('/auth/logout', { refreshToken });
+
 export default authApi;

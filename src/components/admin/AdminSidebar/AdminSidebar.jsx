@@ -5,8 +5,9 @@ export default function AdminSidebar() {
   const menuItems = [
     { path: "/admin/dashboard", icon: "ri-dashboard-line", label: "Tổng quan" },
     { path: "/admin/products", icon: "ri-t-shirt-line", label: "Sản phẩm" },
+    { path: "/admin/categories", icon: "ri-price-tag-3-line", label: "Danh mục" },
     { path: "/admin/orders", icon: "ri-bill-line", label: "Đơn hàng" },
-    { path: "/admin/users", icon: "ri-user-settings-line", label: "Khách hàng" },
+    { path: "/admin/users", icon: "ri-user-settings-line", label: "Tài khoản" },
     { path: "/admin/inventory", icon: "ri-stack-line", label: "Kho hàng" },
     { path: "/admin/coupons", icon: "ri-coupon-3-line", label: "Ưu đãi" },
   ];

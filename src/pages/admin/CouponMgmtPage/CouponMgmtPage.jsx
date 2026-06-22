@@ -8,8 +8,9 @@ const initialForm = {
   code: "",
   discountType: "PERCENT",
   discountValue: "",
-  minOrderAmount: "",
-  maxDiscountAmount: "",
+  minOrderValue: "",
+  maxDiscount: "",
+  usageLimit: "",
   startDate: "",
   endDate: "",
   active: true,
@@ -72,8 +73,9 @@ const buildForm = (coupon) => ({
   code: getCouponCode(coupon) === "-" ? "" : getCouponCode(coupon),
   discountType: normalizeDiscountType(coupon?.discountType || coupon?.type),
   discountValue: coupon?.discountValue ?? coupon?.value ?? coupon?.amount ?? coupon?.discount ?? "",
-  minOrderAmount: coupon?.minOrderAmount ?? coupon?.minOrderValue ?? coupon?.minimumOrderAmount ?? "",
-  maxDiscountAmount: coupon?.maxDiscountAmount ?? coupon?.maximumDiscountAmount ?? "",
+  minOrderValue: coupon?.minOrderValue ?? coupon?.minOrderAmount ?? coupon?.minimumOrderAmount ?? "",
+  maxDiscount: coupon?.maxDiscount ?? coupon?.maxDiscountAmount ?? coupon?.maximumDiscountAmount ?? "",
+  usageLimit: coupon?.usageLimit ?? coupon?.limit ?? coupon?.maxUsage ?? "",
   startDate: toInputDate(coupon?.startDate || coupon?.validFrom),
   endDate: toInputDate(coupon?.endDate || coupon?.expiredAt || coupon?.expiryDate || coupon?.validUntil),
   active: getActiveValue(coupon),
@@ -82,14 +84,18 @@ const buildForm = (coupon) => ({
 
 const getPayloadValues = (form, currentCoupon = null) => {
   const discountType = normalizeDiscountType(form.discountType);
-  const minOrderAmount =
-    form.minOrderAmount === ""
-      ? Number(currentCoupon?.minOrderAmount ?? currentCoupon?.minimumOrderAmount ?? 0)
-      : Number(form.minOrderAmount);
-  const maxDiscountAmount =
-    form.maxDiscountAmount === ""
-      ? Number(currentCoupon?.maxDiscountAmount ?? currentCoupon?.maximumDiscountAmount ?? 0)
-      : Number(form.maxDiscountAmount);
+  const minOrderValue =
+    form.minOrderValue === ""
+      ? Number(currentCoupon?.minOrderValue ?? currentCoupon?.minOrderAmount ?? 0)
+      : Number(form.minOrderValue);
+  const maxDiscount =
+    form.maxDiscount === ""
+      ? Number(currentCoupon?.maxDiscount ?? currentCoupon?.maxDiscountAmount ?? 0)
+      : Number(form.maxDiscount);
+  const usageLimit =
+    form.usageLimit === ""
+      ? Number(currentCoupon?.usageLimit ?? 1)
+      : Number(form.usageLimit);
 
   return {
     id: getId(currentCoupon),
@@ -97,8 +103,9 @@ const getPayloadValues = (form, currentCoupon = null) => {
     discountType,
     discountTypeLong: discountType === "PERCENT" ? "PERCENTAGE" : "FIXED_AMOUNT",
     discountValue: Number(form.discountValue || 0),
-    minOrderAmount,
-    maxDiscountAmount,
+    minOrderValue,
+    maxDiscount,
+    usageLimit,
     startDate: form.startDate || currentCoupon?.startDate || currentCoupon?.validFrom || "",
     endDate: form.endDate || currentCoupon?.endDate || currentCoupon?.expiredAt || currentCoupon?.expiryDate || "",
     active: form.active,
@@ -156,17 +163,18 @@ const buildPayloadFromShape = (form, { currentCoupon = null, templateCoupon = nu
   setKnownField(
     payload,
     source,
-    ["minOrderAmount", "minOrderValue", "minimumOrderAmount", "minimumPurchaseAmount", "minPurchaseAmount"],
-    values.minOrderAmount,
-    "minOrderAmount",
+    ["minOrderValue", "minOrderAmount", "minimumOrderAmount", "minimumPurchaseAmount", "minPurchaseAmount"],
+    values.minOrderValue,
+    "minOrderValue",
   );
   setKnownField(
     payload,
     source,
-    ["maxDiscountAmount", "maximumDiscountAmount", "maxDiscount"],
-    values.maxDiscountAmount,
-    "maxDiscountAmount",
+    ["maxDiscount", "maxDiscountAmount", "maximumDiscountAmount"],
+    values.maxDiscount,
+    "maxDiscount",
   );
+  setKnownField(payload, source, ["usageLimit", "limit", "maxUsage"], values.usageLimit, "usageLimit");
   setKnownField(payload, source, ["startDate", "validFrom"], values.startDate, "startDate");
   setKnownField(
     payload,
@@ -281,6 +289,11 @@ export default function CouponMgmtPage() {
     if (form.discountType === "PERCENT" && Number(form.discountValue) > 100) {
       return "Ưu đãi phần trăm không được lớn hơn 100%.";
     }
+    if (!form.usageLimit || Number(form.usageLimit) < 1) {
+      return "Giới hạn lượt dùng phải lớn hơn hoặc bằng 1.";
+    }
+    if (!form.startDate) return "Vui lòng chọn ngày bắt đầu.";
+    if (!form.endDate) return "Vui lòng chọn ngày kết thúc.";
     if (form.startDate && form.endDate && new Date(form.startDate) > new Date(form.endDate)) {
       return "Ngày bắt đầu không được sau ngày kết thúc.";
     }
@@ -382,6 +395,7 @@ export default function CouponMgmtPage() {
                   <th>Giảm giá</th>
                   <th>Đơn tối thiểu</th>
                   <th>Tối đa</th>
+                  <th>Lượt dùng</th>
                   <th>Hạn dùng</th>
                   <th>Trạng thái</th>
                   <th>Thao tác</th>
@@ -396,8 +410,11 @@ export default function CouponMgmtPage() {
                     <tr key={id}>
                       <td className={styles.nameCell}>{safeText(getCouponCode(coupon))}</td>
                       <td>{getDiscountText(coupon)}</td>
-                      <td>{formatCurrency(coupon?.minOrderAmount ?? coupon?.minimumOrderAmount)}</td>
-                      <td>{formatCurrency(coupon?.maxDiscountAmount ?? coupon?.maximumDiscountAmount)}</td>
+                      <td>{formatCurrency(coupon?.minOrderValue ?? coupon?.minOrderAmount)}</td>
+                      <td>{formatCurrency(coupon?.maxDiscount ?? coupon?.maxDiscountAmount)}</td>
+                      <td>
+                        {coupon?.usedCount ?? 0} / {coupon?.usageLimit ?? "-"}
+                      </td>
                       <td>{formatDate(coupon?.endDate || coupon?.expiredAt || coupon?.expiryDate)}</td>
                       <td>
                         <span
@@ -478,8 +495,8 @@ export default function CouponMgmtPage() {
             <input
               min="0"
               type="number"
-              value={form.minOrderAmount}
-              onChange={(event) => updateForm("minOrderAmount", event.target.value)}
+              value={form.minOrderValue}
+              onChange={(event) => updateForm("minOrderValue", event.target.value)}
             />
           </label>
 
@@ -488,8 +505,18 @@ export default function CouponMgmtPage() {
             <input
               min="0"
               type="number"
-              value={form.maxDiscountAmount}
-              onChange={(event) => updateForm("maxDiscountAmount", event.target.value)}
+              value={form.maxDiscount}
+              onChange={(event) => updateForm("maxDiscount", event.target.value)}
+            />
+          </label>
+
+          <label className={styles.field}>
+            <span>Giới hạn lượt dùng</span>
+            <input
+              min="1"
+              type="number"
+              value={form.usageLimit}
+              onChange={(event) => updateForm("usageLimit", event.target.value)}
             />
           </label>
 

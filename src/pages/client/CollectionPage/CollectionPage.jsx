@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import categoryApi from "../../../api/categoryApi";
+import { resolveImageUrl } from "../../../utils/productUtils";
 import styles from "./CollectionPage.module.css";
 
 const FALLBACK_IMAGE =
@@ -13,8 +14,30 @@ const getCategoryKey = (category, index) =>
 
 const getCategoryName = (category) => category?.name || "Bộ sưu tập";
 
-const getCategoryImage = (category) =>
-  category?.image || category?.img || category?.thumbnail || FALLBACK_IMAGE;
+const getCategoryImageValue = (image) => {
+  if (!image) return "";
+  if (typeof image === "string") return image;
+  return image.url || image.imageUrl || image.image_url || image.src || image.path || "";
+};
+
+const getCategoryImage = (category) => {
+  const image = [
+    category?.imageUrl,
+    category?.image_url,
+    category?.imageURL,
+    category?.imagePath,
+    category?.image_path,
+    category?.image,
+    category?.img,
+    category?.thumbnail,
+    category?.coverImage,
+    category?.cover_image,
+  ]
+    .map(getCategoryImageValue)
+    .find(Boolean);
+
+  return resolveImageUrl(image) || FALLBACK_IMAGE;
+};
 
 const getCategoryList = (response) => {
   if (Array.isArray(response)) return response;
@@ -90,7 +113,13 @@ export default function CollectionPage() {
             type="button"
             onClick={() => openCategory(featuredCategory)}
           >
-            <img src={getCategoryImage(featuredCategory)} alt={getCategoryName(featuredCategory)} />
+            <img
+              src={getCategoryImage(featuredCategory)}
+              alt={getCategoryName(featuredCategory)}
+              onError={(event) => {
+                event.currentTarget.src = FALLBACK_IMAGE;
+              }}
+            />
             <span className={styles.featuredContent}>
               <span className={styles.featuredLabel}>Nổi bật</span>
               <strong>{getCategoryName(featuredCategory)}</strong>
@@ -106,7 +135,13 @@ export default function CollectionPage() {
                 type="button"
                 onClick={() => openCategory(category)}
               >
-                <img src={getCategoryImage(category)} alt={getCategoryName(category)} />
+                <img
+                  src={getCategoryImage(category)}
+                  alt={getCategoryName(category)}
+                  onError={(event) => {
+                    event.currentTarget.src = FALLBACK_IMAGE;
+                  }}
+                />
                 <span className={styles.cardBody}>
                   <span>{getCategoryName(category)}</span>
                   <small>{category.description || "Xem sản phẩm"}</small>

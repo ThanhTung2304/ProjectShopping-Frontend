@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AdminLayout from "../layouts/AdminLayout/AdminLayout";
 import CustomerLayout from "../layouts/CustomerLayout/CustomerLayout";
 import AuthPage from "../pages/Auth/AuthPage";
+import CategoryMgmtPage from "../pages/admin/CategoryMgmtPage/CategoryMgmtPage";
 import CouponMgmtPage from "../pages/admin/CouponMgmtPage/CouponMgmtPage";
 import DashboardPage from "../pages/admin/DashboardPage/DashboardPage";
 import InventoryPage from "../pages/admin/InventoryPage/InventoryPage";
@@ -71,6 +72,7 @@ export default function AppRouter() {
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="products" element={<ProductMgmtPage />} />
+          <Route path="categories" element={<CategoryMgmtPage />} />
           <Route path="orders" element={<OrderMgmtPage />} />
           <Route path="users" element={<UserMgmtPage />} />
           <Route path="inventory" element={<InventoryPage />} />

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import userApi from '../api/userApi';
+import { logoutApi } from '../api/authApi'; // MỚI
 import { buildAuthUser } from '../utils/authUtils';
 import { AuthContext } from './authContextValue';
 
@@ -8,12 +9,13 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const clearSession = () => {
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('refreshToken'); // MỚI — xóa cả refresh token
     setUser(null);
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (!token) {
       setLoading(false);
       return;
@@ -38,6 +40,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    const refreshToken = sessionStorage.getItem('refreshToken'); 
+    if (refreshToken) {
+      logoutApi(refreshToken).catch(() => {}); // — báo backend xóa refresh token, lỗi thì vẫn cho logout phía client
+    }
     clearSession();
   };
 

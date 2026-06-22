@@ -457,6 +457,35 @@
   font-weight: 700;
 }
 
+.formSection {
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid #eee;
+  padding-top: 16px;
+}
+
+.formSectionHeader {
+  display: grid;
+  gap: 4px;
+}
+
+.formSectionHeader strong {
+  color: #111;
+  font-size: 0.92rem;
+}
+
+.formSectionHeader span {
+  color: #777;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.formSectionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
 .variantEditor {
   display: grid;
   gap: 12px;
@@ -514,6 +543,23 @@
 
 .imageUrlField {
   min-width: 0;
+}
+
+.categoryImagePicker {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.categoryImageActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hiddenFileInput {
+  display: none;
 }
 
 .variantHeader {
@@ -742,6 +788,10 @@
   }
 
   .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formSectionGrid {
     grid-template-columns: 1fr;
   }
 

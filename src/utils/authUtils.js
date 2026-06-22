@@ -63,7 +63,7 @@ export const isAdminRole = (role) => {
 export const isAdminUser = (user) => isAdminRole(extractRole(user));
 
 export const getTokenUser = () => {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   if (!token) return null;
 
   const payload = decodeTokenPayload(token);

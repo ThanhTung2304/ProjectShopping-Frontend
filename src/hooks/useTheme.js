@@ -4,7 +4,7 @@ const STORAGE_KEY = "theme";
 const THEMES = ["light", "dark"];
 
 const getPreferredTheme = () => {
-  const savedTheme = localStorage.getItem(STORAGE_KEY);
+  const savedTheme = sessionStorage.getItem(STORAGE_KEY);
   if (THEMES.includes(savedTheme)) return savedTheme;
 
   const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
@@ -17,7 +17,7 @@ export function useTheme() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     document.documentElement.classList.toggle("dark", theme === "dark");
-    localStorage.setItem(STORAGE_KEY, theme);
+    sessionStorage.setItem(STORAGE_KEY, theme);
   }, [theme]);
 
   const toggleTheme = () => {
