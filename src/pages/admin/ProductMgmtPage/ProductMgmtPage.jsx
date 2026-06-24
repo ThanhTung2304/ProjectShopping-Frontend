@@ -10,6 +10,7 @@ const initialForm = {
   slug: "",
   description: "",
   categoryId: "",
+  sizeType: "CLOTHING",
   images: [],
   deletedImageIds: [],
   featured: false,
@@ -39,6 +40,15 @@ const initialImage = {
 };
 
 const FEATURED_PRODUCTS_KEY = "featuredProductIds";
+const SIZE_TYPE_OPTIONS = [
+  { value: "CLOTHING", label: "Ao / Quan ao", sizes: ["S", "M", "L", "XL", "XXL"] },
+  { value: "PANTS", label: "Quan", sizes: ["28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38"] },
+  { value: "SHOES", label: "Giay", sizes: ["35", "36", "37", "38", "39", "40", "41", "42", "43", "44"] },
+  { value: "FREE_SIZE", label: "Free size", sizes: ["FREE_SIZE"] },
+];
+
+const getSizeOptions = (sizeType) =>
+  SIZE_TYPE_OPTIONS.find((option) => option.value === sizeType)?.sizes || SIZE_TYPE_OPTIONS[0].sizes;
 
 const generateSlug = (name) =>
   name
@@ -194,6 +204,7 @@ const buildProductForm = (product, categories = []) => ({
   slug: product?.slug || "",
   description: product?.description || "",
   categoryId: getCategoryId(product, categories),
+  sizeType: product?.sizeType || product?.size_type || "CLOTHING",
   images: getProductImages(product),
   deletedImageIds: [],
   featured: getFeaturedValue(product),
@@ -206,6 +217,7 @@ const buildProductPayload = (form) => ({
   slug: form.slug.trim() || generateSlug(form.name),
   description: form.description.trim(),
   categoryId: Number(form.categoryId),
+  sizeType: form.sizeType || "CLOTHING",
   featured: form.featured,
   isFeatured: form.featured,
   bestSeller: form.featured,
@@ -222,7 +234,7 @@ const buildVariantPayload = (variant) => ({
   isActive: variant.isActive ?? true,
 });
 
-const validateVariant = (variant) => {
+const validateVariant = (variant, sizeOptions = []) => {
   if (!variant.size.trim()) return "Vui lòng nhập size.";
   if (!variant.color.trim()) return "Vui lòng nhập màu sắc.";
   if (!variant.sku.trim()) return "Vui lòng nhập SKU.";
@@ -250,6 +262,7 @@ export default function ProductMgmtPage() {
   const [deletingId, setDeletingId] = useState(null);
 
   const flatCategories = useMemo(() => flattenCategories(categories), [categories]);
+  const currentSizeOptions = useMemo(() => getSizeOptions(form.sizeType), [form.sizeType]);
 
   const loadProducts = async () => {
     setLoading(true);
@@ -334,6 +347,10 @@ export default function ProductMgmtPage() {
   };
 
   const updateForm = (field, value) => {
+    if (field === "sizeType") {
+      setNewVariant((variant) => ({ ...variant, size: getSizeOptions(value)[0] || "" }));
+    }
+
     setForm((current) => {
       const updated = { ...current, [field]: value };
       if (field === "name" && (!current.slug || current.slug === generateSlug(current.name))) {
@@ -444,7 +461,7 @@ export default function ProductMgmtPage() {
   };
 
   const handleAddVariant = async () => {
-    const validationMessage = validateVariant(newVariant);
+    const validationMessage = validateVariant(newVariant, currentSizeOptions);
     if (validationMessage) {
       setNewVariantError(validationMessage);
       return;
@@ -529,8 +546,8 @@ const syncProductImages = async (productId, imageForm) => {
     const emptyNewImage = form.images.find((image) => image.isNew && !image.file);
     if (emptyNewImage) return "Vui lòng chọn file ảnh hoặc xóa dòng ảnh trống.";
 
-    const invalidVariant = form.variants.find(validateVariant);
-    if (invalidVariant) return validateVariant(invalidVariant);
+    const invalidVariant = form.variants.find((variant) => validateVariant(variant, currentSizeOptions));
+    if (invalidVariant) return validateVariant(invalidVariant, currentSizeOptions);
 
     return "";
   };
@@ -741,6 +758,17 @@ const syncProductImages = async (productId, imageForm) => {
             </select>
           </label>
 
+          <label className={styles.field}>
+            <span>He size</span>
+            <select value={form.sizeType} onChange={(event) => updateForm("sizeType", event.target.value)}>
+              {SIZE_TYPE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
           <label className={`${styles.field} ${styles.fullField}`}>
             <span>Mô tả</span>
             <textarea value={form.description} onChange={(event) => updateForm("description", event.target.value)} />
@@ -850,6 +878,7 @@ const syncProductImages = async (productId, imageForm) => {
                   className={styles.ghostBtn}
                   onClick={() => {
                     setShowAddVariant((current) => !current);
+                    setNewVariant((variant) => ({ ...variant, size: variant.size || currentSizeOptions[0] || "" }));
                     setNewVariantError("");
                   }}
                   disabled={saving || addingVariant}
@@ -865,11 +894,17 @@ const syncProductImages = async (productId, imageForm) => {
                 <div className={styles.variantRow}>
                   <label className={styles.compactField}>
                     <span>Size</span>
-                    <input
+                    <select
                       value={newVariant.size}
                       onChange={(event) => updateNewVariant("size", event.target.value)}
-                      placeholder="S, M, L..."
-                    />
+                    >
+                      <option value="">Chon size</option>
+                      {currentSizeOptions.map((size) => (
+                        <option key={size} value={size}>
+                          {size}
+                        </option>
+                      ))}
+                    </select>
                   </label>
                   <label className={styles.compactField}>
                     <span>Màu sắc</span>
@@ -938,6 +973,37 @@ const syncProductImages = async (productId, imageForm) => {
 
                   return (
                     <div className={styles.variantRow} key={variantKey || `${variant.size}-${variant.color}`}>
+                      <label className={styles.compactField}>
+                        <span>Size</span>
+                        <select
+                          value={variant.size}
+                          onChange={(event) => updateVariantForm(variantKey, "size", event.target.value)}
+                        >
+                          <option value="">Chon size</option>
+                          {currentSizeOptions.map((size) => (
+                            <option key={size} value={size}>
+                              {size}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label className={styles.compactField}>
+                        <span>Mau sac</span>
+                        <input
+                          value={variant.color}
+                          onChange={(event) => updateVariantForm(variantKey, "color", event.target.value)}
+                        />
+                      </label>
+
+                      <label className={styles.compactField}>
+                        <span>SKU</span>
+                        <input
+                          value={variant.sku}
+                          onChange={(event) => updateVariantForm(variantKey, "sku", event.target.value)}
+                        />
+                      </label>
+
                       <div className={styles.variantMeta}>
                         <strong>{[variant.size, variant.color].filter(Boolean).join(" / ") || "Biến thể"}</strong>
                         <span>{variant.sku || "Chưa có SKU"}</span>
