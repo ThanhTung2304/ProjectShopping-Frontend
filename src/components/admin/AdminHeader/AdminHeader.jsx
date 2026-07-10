@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/authContextValue";
+import NotificationDropdown from "../../common/NotificationDropdown/NotificationDropdown";
 import styles from "./AdminHeader.module.css";
 
 const titleByPath = {
@@ -14,7 +15,7 @@ const titleByPath = {
 };
 
 export default function AdminHeader() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -32,6 +33,12 @@ export default function AdminHeader() {
       </div>
 
       <div className={styles.actions}>
+        <NotificationDropdown
+          isAuthenticated={isAuthenticated}
+          className={styles.notificationBtn}
+          iconClassName={styles.notificationIcon}
+        />
+
         <div className={styles.userInfo}>
           <p className={styles.name}>{user?.fullName || "Admin"}</p>
           <span className={styles.role}>Quản trị viên</span>

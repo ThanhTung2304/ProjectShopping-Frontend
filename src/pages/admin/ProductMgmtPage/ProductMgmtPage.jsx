@@ -1029,6 +1029,16 @@ const syncProductImages = async (productId, imageForm) => {
                           placeholder="Không sale"
                         />
                       </label>
+
+                      <label className={styles.compactField}>
+                        <span>Tồn kho</span>
+                        <input
+                          min="0"
+                          type="number"
+                          value={variant.stockQuantity}
+                          onChange={(event) => updateVariantForm(variantKey, "stockQuantity", event.target.value)}
+                        />
+                      </label>
                     </div>
                   );
                 })}
