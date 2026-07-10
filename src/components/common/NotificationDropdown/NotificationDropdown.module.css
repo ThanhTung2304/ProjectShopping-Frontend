@@ -1,0 +1,133 @@
+.wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.trigger {
+  position: relative;
+}
+
+.badge {
+  position: absolute;
+  top: -7px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #d93025;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.64rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: min(360px, calc(100vw - 28px));
+  max-height: 460px;
+  overflow: hidden;
+  border: 1px solid #ececec;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.14);
+  z-index: 1300;
+}
+
+.panelHeader {
+  min-height: 52px;
+  padding: 0 16px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panelHeader strong {
+  color: #111;
+  font-size: 0.95rem;
+}
+
+.panelHeader button {
+  border: 0;
+  background: transparent;
+  color: #7b6338;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.panelHeader button:disabled {
+  color: #bdbdbd;
+  cursor: default;
+}
+
+.list {
+  max-height: 408px;
+  overflow-y: auto;
+}
+
+.empty {
+  margin: 0;
+  padding: 28px 18px;
+  color: #777;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.item {
+  width: 100%;
+  padding: 14px 16px;
+  border: 0;
+  border-bottom: 1px solid #f3f3f3;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  display: grid;
+  gap: 5px;
+  text-align: left;
+}
+
+.item:hover {
+  background: #faf8f3;
+}
+
+.item:last-child {
+  border-bottom: 0;
+}
+
+.unread {
+  background: #fffaf1;
+}
+
+.itemTitle {
+  color: #111;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.itemMessage {
+  color: #555;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.itemTime {
+  color: #999;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .panel {
+    right: -72px;
+  }
+}

@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/authContextValue";
 import { CartContext } from "../../../context/cartContextValue";
+import NotificationDropdown from "../../common/NotificationDropdown/NotificationDropdown";
 import SearchBar from "../SearchBar/SearchBar";
 import styles from "./Header.module.css";
 
@@ -124,14 +125,11 @@ export default function Header() {
           </nav>
 
           <div className={styles.actions}>
-            <button className={styles.iconBtn} type="button" aria-label="Thông báo">
-              <span className={styles.headerIcon} aria-hidden="true">
-                <svg viewBox="0 0 24 24" focusable="false">
-                  <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z" />
-                  <path d="M10 20a2 2 0 0 0 4 0" />
-                </svg>
-              </span>
-            </button>
+            <NotificationDropdown
+              isAuthenticated={isAuthenticated}
+              className={styles.iconBtn}
+              iconClassName={styles.headerIcon}
+            />
 
             <Link to={isAuthenticated ? "/cart" : "/auth"} className={styles.iconBtn}>
               <span className={styles.headerIcon} aria-hidden="true">
