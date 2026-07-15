@@ -14,6 +14,7 @@ import CollectionDetailPage from "../pages/client/CollectionDetailPage/Collectio
 import CollectionPage from "../pages/client/CollectionPage/CollectionPage";
 import CheckoutPage from "../pages/client/CheckoutPage/CheckoutPage";
 import HomePage from "../pages/client/HomePage/HomePage";
+import PaymentReturnPage from "../pages/client/PaymentReturnPage/PaymentReturnPage";
 import ProductDetailPage from "../pages/client/ProductDetailPage/ProductDetailPage";
 import ProductListPage from "../pages/client/ProductListPage/ProductListPage";
 import ProfilePage from "../pages/client/ProfilePage/ProfilePage";
@@ -59,6 +60,8 @@ export default function AppRouter() {
               </GuardRoute>
             }
           />
+          <Route path="/order-result" element={<PaymentReturnPage />} />
+          <Route path="/payment-return" element={<PaymentReturnPage />} />
         </Route>
 
         <Route

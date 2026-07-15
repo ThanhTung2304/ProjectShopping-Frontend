@@ -150,6 +150,13 @@
   text-transform: uppercase;
 }
 
+.optionHint {
+  margin: -4px 0 12px;
+  color: #777;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
 .choiceGrid {
   display: flex;
   flex-wrap: wrap;
