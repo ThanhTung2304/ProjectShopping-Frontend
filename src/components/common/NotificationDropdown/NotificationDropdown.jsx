@@ -4,6 +4,19 @@ import notificationApi from "../../../api/notificationApi";
 import styles from "./NotificationDropdown.module.css";
 
 const ORDER_TYPES = new Set(["ORDER_STATUS_UPDATED", "ORDER_CANCELLED", "ORDER_DELIVERED"]);
+const ORDER_STATUS_LABELS = {
+  PENDING: "Chờ xác nhận",
+  CONFIRMED: "Đã xác nhận",
+  SHIPPING: "Đang giao",
+  DELIVERED: "Đã giao",
+  CANCELLED: "Đã hủy",
+};
+
+const translateOrderStatuses = (value) =>
+  String(value || "").replace(
+    /\b(PENDING|CONFIRMED|SHIPPING|DELIVERED|CANCELLED)\b/g,
+    (status) => ORDER_STATUS_LABELS[status],
+  );
 
 const formatTime = (value) => {
   if (!value) return "";
@@ -164,8 +177,8 @@ export default function NotificationDropdown({ isAuthenticated, className = "", 
                   type="button"
                   onClick={() => handleNotificationClick(notification)}
                 >
-                  <span className={styles.itemTitle}>{notification.title}</span>
-                  <span className={styles.itemMessage}>{notification.message}</span>
+                  <span className={styles.itemTitle}>{translateOrderStatuses(notification.title)}</span>
+                  <span className={styles.itemMessage}>{translateOrderStatuses(notification.message)}</span>
                   <span className={styles.itemTime}>{formatTime(notification.createdAt)}</span>
                 </button>
               ))

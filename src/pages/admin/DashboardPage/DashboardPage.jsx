@@ -14,6 +14,17 @@ const getOrderTotal = (order) => order?.finalAmount ?? order?.totalAmount ?? 0;
 
 const getOrderStatus = (order) => String(order?.status || "PENDING").toUpperCase();
 
+const ORDER_STATUS_LABELS = {
+  PENDING: "Chờ xác nhận",
+  CONFIRMED: "Đã xác nhận",
+  SHIPPING: "Đang giao",
+  DELIVERED: "Đã giao",
+  CANCELLED: "Đã hủy",
+};
+
+const getOrderStatusLabel = (order) =>
+  ORDER_STATUS_LABELS[getOrderStatus(order)] || order?.status || "Mới";
+
 const getOrderStatusClass = (order) => {
   const status = getOrderStatus(order);
   if (status === "DELIVERED") return styles.statusSuccess;
@@ -199,7 +210,7 @@ export default function DashboardPage() {
                     <tr key={getOrderId(order)}>
                       <td className={styles.nameCell}>#{getOrderCode(order)}</td>
                       <td>{safeText(getCustomerName(order))}</td>
-                      <td><span className={`${styles.status} ${getOrderStatusClass(order)}`}>{safeText(order.status, "Mới")}</span></td>
+                      <td><span className={`${styles.status} ${getOrderStatusClass(order)}`}>{getOrderStatusLabel(order)}</span></td>
                       <td>{formatMoney(getOrderTotal(order))}</td>
                     </tr>
                   ))}

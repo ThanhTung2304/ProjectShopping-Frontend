@@ -236,6 +236,9 @@ const buildVariantPayload = (variant) => ({
 
 const validateVariant = (variant, sizeOptions = []) => {
   if (!variant.size.trim()) return "Vui lòng nhập size.";
+  if (sizeOptions.length > 0 && !sizeOptions.includes(variant.size.trim())) {
+    return "Size không thuộc hệ size đã chọn.";
+  }
   if (!variant.color.trim()) return "Vui lòng nhập màu sắc.";
   if (!variant.sku.trim()) return "Vui lòng nhập SKU.";
   if (variant.price === "" || Number(variant.price) <= 0) return "Giá bán phải lớn hơn 0.";

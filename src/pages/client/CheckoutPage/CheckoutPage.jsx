@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import addressApi from "../../../api/addressApi";
 import couponApi from "../../../api/couponApi";
 import orderApi from "../../../api/orderApi";
+import paymentApi from "../../../api/paymentApi";
 // import userApi from "../../../api/userApi";
 import { CartContext } from "../../../context/cartContextValue";
 import { formatCurrency, getResponseList } from "../../../utils/productUtils";
@@ -119,6 +120,12 @@ const formatShippingAddress = (address) => {
   return joinUniqueAddressParts([fullAddress]);
 };
 
+const getResponseData = (response) => response?.data || response;
+const getOrderId = (response) => {
+  const data = getResponseData(response);
+  return data?.id || data?.orderId || data?.order?.id || data?.order?.orderId;
+};
+
 // ===== COMPONENT =====
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -211,6 +218,8 @@ export default function CheckoutPage() {
     setSubmitting(true);
     setError("");
 
+    let createdOrderId = null;
+
     try {
       const payload = {
         addressId: selectedAddressId,
@@ -220,11 +229,38 @@ export default function CheckoutPage() {
       };
 
       const res = await orderApi.create(payload);
-      if (res?.data?.success === false) throw new Error(res.data.message || "Đặt hàng thất bại.");
+      const orderData = getResponseData(res);
+      createdOrderId = getOrderId(res);
+      if (res?.success === false || orderData?.success === false) {
+        throw new Error(res?.message || orderData?.message || "Đặt hàng thất bại.");
+      }
+
+      if (form.paymentMethod === "BANK_TRANSFER") {
+        const orderId = createdOrderId;
+        if (!orderId) throw new Error("Không lấy được mã đơn hàng để tạo thanh toán VNPay.");
+
+        const paymentResponse = await paymentApi.createVnpayPayment({ orderId });
+        const paymentData = getResponseData(paymentResponse);
+        const paymentUrl = paymentData?.paymentUrl;
+        if (!paymentUrl) throw new Error("Không nhận được đường dẫn thanh toán VNPay.");
+
+        sessionStorage.setItem("vnpayOrderId", String(orderId));
+        window.location.assign(paymentUrl);
+        return;
+      }
 
       await fetchCart();
       navigate("/home");
     } catch (err) {
+      if (createdOrderId && form.paymentMethod === "BANK_TRANSFER") {
+        try {
+          await orderApi.cancelOrder(createdOrderId);
+          await fetchCart();
+        } catch {
+          // Nếu hủy nháp thất bại, vẫn trả lỗi gốc để user biết bước thanh toán không hoàn tất.
+        }
+      }
+
       setError(
         err.response?.data?.message ||
         err.response?.data?.errors?.addressId ||
@@ -300,7 +336,7 @@ export default function CheckoutPage() {
                 checked={form.paymentMethod === "BANK_TRANSFER"}
                 onChange={handleChange}
               />
-              <span>Chuyển khoản ngân hàng</span>
+              <span>Thanh toán qua VNPay</span>
             </label>
           </div>
 

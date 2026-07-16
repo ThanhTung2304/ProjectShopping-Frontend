@@ -91,6 +91,13 @@ const getProductColors = (product, selectedSize = "") => {
 const getTotalVariantStock = (product) =>
   getActiveVariants(product).reduce((total, variant) => total + getVariantStock(variant), 0);
 
+const getProductTotalStock = (product) =>
+  Number(
+    product?.totalStock ??
+      product?.total_stock ??
+      getTotalVariantStock(product),
+  );
+
 const findProductInList = (products, id) =>
   products.find((item) => {
     const keys = [item?.id, item?._id, item?.slug].filter(Boolean).map(String);
@@ -301,6 +308,7 @@ export default function ProductDetailPage() {
     );
   }, [product, selectedColor, selectedSize]);
   const stock = selectedVariant ? getVariantStock(selectedVariant) : getTotalVariantStock(product);
+  const totalStock = getProductTotalStock(product);
   const displayPrice = selectedVariant ? getVariantPrice(selectedVariant) : getProductPrice(product);
   const productId = getCartProductId(product);
   const isAdding = submittingItemId === productId;
@@ -410,7 +418,7 @@ export default function ProductDetailPage() {
         <div className={styles.metaRow}>
           <span className={styles.category}>{product.categoryName || product.category?.name || "Sản phẩm"}</span>
           <span className={`${styles.stockBadge} ${isOutOfStock ? styles.stockDanger : ""}`}>
-            {isOutOfStock ? "Hết hàng" : hasVariants ? `Còn ${stock} sản phẩm` : "Còn hàng"}
+            {totalStock <= 0 ? "Hết hàng" : `Còn ${totalStock} sản phẩm`}
           </span>
         </div>
 
@@ -424,6 +432,11 @@ export default function ProductDetailPage() {
 
         <div className={styles.options}>
           <p className={styles.optionTitle}>Kích thước: {selectedSize}</p>
+          {hasVariants && (
+            <p className={styles.optionHint}>
+              Biến thể đang chọn còn {stock} sản phẩm
+            </p>
+          )}
           <div className={styles.choiceGrid}>
             {sizes.map((size) => (
               <button
