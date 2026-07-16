@@ -6,6 +6,14 @@ import styles from "../AdminPages.module.css";
 
 const ORDER_STATUS_FLOW = ["PENDING", "CONFIRMED", "SHIPPING", "DELIVERED"];
 
+const ORDER_STATUS_LABELS = {
+  PENDING: "Chờ xác nhận",
+  CONFIRMED: "Đã xác nhận",
+  SHIPPING: "Đang giao",
+  DELIVERED: "Đã giao",
+  CANCELLED: "Đã hủy",
+};
+
 const formatMonthValue = (date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
@@ -14,6 +22,9 @@ const getOrderId = (order) => order?.id;
 const getOrderCode = (order) => order?.orderCode || getOrderId(order);
 
 const getOrderStatus = (order) => String(order?.status || "PENDING").toUpperCase();
+
+const getOrderStatusLabel = (order) =>
+  ORDER_STATUS_LABELS[getOrderStatus(order)] || order?.status || "Mới";
 
 const getOrderDate = (order) => {
   const value = order?.orderedAt;
@@ -216,7 +227,7 @@ export default function OrderMgmtPage() {
                       <td>{safeText(getPaymentText(order))}</td>
                       <td>
                         <span className={`${styles.status} ${getOrderStatusClass(order)}`}>
-                          {safeText(order.status, "Mới")}
+                          {getOrderStatusLabel(order)}
                         </span>
                       </td>
                       <td>{formatMoney(getOrderTotal(order))}</td>
@@ -271,7 +282,7 @@ export default function OrderMgmtPage() {
               </div>
               <div>
                 <span>Trạng thái</span>
-                <strong>{safeText(selectedOrder.status, "Mới")}</strong>
+                <strong>{getOrderStatusLabel(selectedOrder)}</strong>
               </div>
               <div>
                 <span>Tổng tiền</span>

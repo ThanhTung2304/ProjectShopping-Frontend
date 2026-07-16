@@ -1,4 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import axiosClient from "../api/axiosClient";
 import cartApi from "../api/cartApi";
 import productApi from "../api/productApi";
 import { AuthContext } from "./authContextValue";
@@ -21,7 +22,17 @@ const saveLocalCart = (items) => {
 };
 
 const getCartItemImage = (item, product) => {
-  const directImage = item.image || item.img || item.imageUrl;
+  const directImage =
+    item.image ||
+    item.img ||
+    item.imageUrl ||
+    item.image_url ||
+    item.productImage ||
+    item.productImageUrl ||
+    item.product_image ||
+    item.thumbnail ||
+    item.thumbnailUrl ||
+    item.imagePath;
   if (directImage) {
     return resolveImageUrl(
       typeof directImage === "string" ? directImage : getProductImage({ images: [directImage] }),
@@ -32,15 +43,40 @@ const getCartItemImage = (item, product) => {
 
 const FALLBACK_CART_IMAGE_PREFIX = "data:image/svg+xml";
 
-// ✅ Sửa: thêm item.unitPrice và item.productName
+const loadAuthenticatedImage = async (imageUrl) => {
+  const apiBaseUrl = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+  if (!imageUrl || !apiBaseUrl || !imageUrl.startsWith(apiBaseUrl)) return imageUrl;
+
+  try {
+    const imageBlob = await axiosClient.get(imageUrl, { responseType: "blob" });
+    return imageBlob instanceof Blob ? URL.createObjectURL(imageBlob) : imageUrl;
+  } catch {
+    return imageUrl;
+  }
+};
+
 const normalizeCartItem = (item) => {
-  const product = item.product || item.productId || {};
   const variant = item.variant || item.productVariant || item.productVariantId || {};
+  const product =
+    item.product ||
+    item.productInfo ||
+    item.productDto ||
+    (typeof item.productId === "object" ? item.productId : null) ||
+    variant.product ||
+    variant.productInfo ||
+    {};
   const id = item.id || item._id || item.cartItemId || product.id || product._id || item.productId;
   const productId =
-    item.productId && typeof item.productId !== "object"
-      ? item.productId
-      : product.id || product._id || item.product || id;
+    (item.productId && typeof item.productId !== "object" ? item.productId : null) ||
+    item.product_id ||
+    product.id ||
+    product._id ||
+    product.productId ||
+    variant.productId ||
+    variant.product_id ||
+    variant.product?.id ||
+    variant.product?._id ||
+    null;
   const productVariantId =
     item.productVariantId && typeof item.productVariantId !== "object"
       ? item.productVariantId
@@ -73,17 +109,27 @@ const normalizeCartItem = (item) => {
 };
 
 const hydrateCartItemImage = async (item) => {
-  if (item.image && !item.image.startsWith(FALLBACK_CART_IMAGE_PREFIX)) return item;
-  if (!item.productId) return item;
+  let hydratedItem = item;
 
-  try {
-    const product = getResponseItem(await productApi.getById(item.productId));
-    return product
-      ? { ...item, image: getProductImage(product), product: { ...item.product, ...product } }
-      : item;
-  } catch {
-    return item;
+  if ((!item.image || item.image.startsWith(FALLBACK_CART_IMAGE_PREFIX)) && item.productId) {
+    try {
+      const product = getResponseItem(await productApi.getById(item.productId));
+      if (product) {
+        hydratedItem = {
+          ...item,
+          image: getProductImage(product),
+          product: { ...item.product, ...product },
+        };
+      }
+    } catch {
+      // Keep the fallback image when the product detail cannot be loaded.
+    }
   }
+
+  return {
+    ...hydratedItem,
+    image: await loadAuthenticatedImage(hydratedItem.image),
+  };
 };
 
 const mergeCartItems = (serverItems, localItems) => {

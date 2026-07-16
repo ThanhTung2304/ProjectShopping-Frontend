@@ -64,12 +64,6 @@ export default function CartPage() {
 
           {error && <div className={styles.error}>{error}</div>}
 
-          <div className={styles.tableHead}>
-            <span>Sản phẩm</span>
-            <span>Số lượng</span>
-            <span>Tổng</span>
-          </div>
-
           {cartItems.map((item) => {
             const isSubmitting = submittingItemId === item.id || isSubmittingAll;
             const itemTotal = Number(item.price || 0) * Number(item.quantity || 0);

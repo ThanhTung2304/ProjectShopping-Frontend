@@ -32,7 +32,18 @@ export const resolveImageUrl = (value) => {
 const getImageValue = (image) => {
   if (!image) return "";
   if (typeof image === "string") return resolveImageUrl(image);
-  return resolveImageUrl(image.url || image.imageUrl || image.image_url || image.src || image.path || "");
+  return resolveImageUrl(
+    image.url ||
+      image.imageUrl ||
+      image.image_url ||
+      image.productImage ||
+      image.productImageUrl ||
+      image.thumbnailUrl ||
+      image.imagePath ||
+      image.src ||
+      image.path ||
+      "",
+  );
 };
 
 const sortImages = (images = []) =>
@@ -49,7 +60,13 @@ export const getProductImage = (product, fallback = FALLBACK_PRODUCT_IMAGE) => {
   const images = [
     product?.img,
     product?.image,
+    product?.imageUrl,
+    product?.image_url,
+    product?.productImage,
+    product?.productImageUrl,
     product?.thumbnail,
+    product?.thumbnailUrl,
+    product?.imagePath,
     sortImages(product?.images || product?.productImages || product?.product_images || [])[0],
     product?.gallery?.[0],
   ]
