@@ -59,7 +59,7 @@ export default function DashboardPage() {
       setLoading(true);
       const [productResult, orderResult] = await Promise.allSettled([
         productApi.getAll(),
-        orderApi.adminGetAllOrders(),
+        orderApi.adminGetAllOrderPages(),
       ]);
 
       if (productResult.status === "fulfilled") {
@@ -67,8 +67,7 @@ export default function DashboardPage() {
       }
 
       if (orderResult.status === "fulfilled") {
-        const list = orderResult.value?.data?.content || [];
-        setOrders(list);
+        setOrders(orderResult.value);
       }
 
       setLoading(false);

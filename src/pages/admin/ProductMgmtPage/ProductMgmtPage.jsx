@@ -79,7 +79,7 @@ const fetchProductVariants = async (product) => {
 };
 
 const fetchProductList = async () => {
-  const products = getList(await productApi.getAll());
+  const products = await productApi.getAllPages();
 
   return Promise.all(
     products.map(async (product) => {

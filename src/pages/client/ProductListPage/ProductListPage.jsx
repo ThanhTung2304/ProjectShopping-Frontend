@@ -9,7 +9,6 @@ import {
   getProductPathId,
   getProductPrice,
   getResponseItem,
-  getResponseList,
   matchesProductCategory,
   sortProductList,
 } from "../../../utils/productUtils";
@@ -58,14 +57,12 @@ export default function ProductListPage() {
       setError(null);
 
       try {
-        const response = await productApi.getAll({
+        const data = await productApi.getAllPages({
           category: currentCategory === "all" ? undefined : currentCategory,
           categoryId: currentCategory === "all" ? undefined : currentCategory,
           sort: currentSort,
           search: currentSearch || undefined,
         });
-        const data = getResponseList(response);
-
         if (Array.isArray(data)) {
           setProducts(await hydrateProductsWithImages(data));
         } else {
