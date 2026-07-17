@@ -96,9 +96,7 @@ export default function OrderMgmtPage() {
       setLoading(true);
       setError("");
       try {
-        const response = await orderApi.adminGetAllOrders();
-        const list = response?.data?.content || [];
-        setOrders(list);
+        setOrders(await orderApi.adminGetAllOrderPages());
       } catch (err) {
         setError(err.response?.data?.message || "Không thể tải danh sách đơn hàng.");
       } finally {

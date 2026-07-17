@@ -1,10 +1,50 @@
 import axiosClient from "./axiosClient";
 
+const getResponseList = (response) => {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.content)) return response.data.content;
+  if (Array.isArray(response?.content)) return response.content;
+  return [];
+};
+
+const getTotalPages = (response) =>
+  Number(response?.totalPages ?? response?.data?.totalPages ?? response?.page?.totalPages ?? response?.data?.page?.totalPages ?? 1);
+
+const getProductKey = (product) => product?.id || product?._id || product?.slug || product?.name;
+
 const productApi = {
   // ===== PUBLIC PRODUCT =====
 
   // GET /api/products
   getAll: (params) => axiosClient.get("/api/products", { params }),
+
+  // API phân trang mặc định, nên lấy tất cả các trang cho các màn hình danh sách.
+  getAllPages: async (params = {}) => {
+    const defaultResponse = await axiosClient.get("/api/products", { params });
+    const defaultProducts = getResponseList(defaultResponse);
+
+    try {
+      const totalPages = getTotalPages(defaultResponse);
+      const responses = totalPages > 1
+        ? await Promise.all(
+            Array.from({ length: totalPages - 1 }, (_, index) =>
+              axiosClient.get("/api/products", { params: { ...params, page: index + 1 } }),
+            ),
+          )
+        : [];
+
+      const seen = new Set();
+      return [defaultResponse, ...responses].flatMap(getResponseList).filter((product) => {
+        const key = String(getProductKey(product) || "");
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    } catch {
+      return defaultProducts;
+    }
+  },
 
   // GET /api/products/{slug}
   getBySlug: (slug) => axiosClient.get(`/api/products/${slug}`),
