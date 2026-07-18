@@ -10,7 +10,6 @@ import {
   getProductPathId,
   getProductPrice,
   getResponseItem,
-  getResponseList,
 } from "../../../utils/productUtils";
 
 const FEATURED_PRODUCTS_KEY = "featuredProductIds";
@@ -55,11 +54,11 @@ export default function HomePage() {
       try {
         // Gọi API để lấy các sản phẩm nổi bật
         // Giả định backend hỗ trợ filter theo 'featured=true'
-        const response = await productApi.getAll({ featured: true, limit: 4 }); // Lấy 4 sản phẩm nổi bật
+        const response = await productApi.getAllPages();
         
-        let data = getResponseList(response);
+        let data = response;
         if (data.length === 0) {
-          data = getResponseList(await productApi.getAll());
+          data = await productApi.getAllPages();
         }
         if (Array.isArray(data)) {
           const hydratedProducts = await hydrateProductsWithImages(data);
@@ -70,14 +69,14 @@ export default function HomePage() {
           });
 
           if (featuredOnly.length === 0) {
-            const allProducts = await hydrateProductsWithImages(getResponseList(await productApi.getAll()));
+            const allProducts = await hydrateProductsWithImages(await productApi.getAllPages());
             featuredOnly = allProducts.filter((product) => {
               const productKeys = getFeaturedProductKeys(product);
               return isFeaturedProduct(product) || productKeys.some((key) => storedFeaturedIds.includes(key));
             });
           }
 
-          setFeaturedProducts(featuredOnly.slice(0, 4));
+          setFeaturedProducts(featuredOnly);
         } else {
           setError(response.message || "Không thể tải sản phẩm nổi bật.");
         }
