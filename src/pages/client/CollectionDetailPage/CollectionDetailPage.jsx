@@ -83,7 +83,7 @@ export default function CollectionDetailPage() {
         const [categoryDetailResult, categoryListResult, productResult] = await Promise.allSettled([
           categoryApi.getById(categoryId),
           categoryApi.getAll(),
-          productApi.getAll(),
+          productApi.getAllPages(),
         ]);
 
         const categoryDetail =
@@ -98,7 +98,7 @@ export default function CollectionDetailPage() {
           throw productResult.reason;
         }
 
-        const data = getResponseList(productResult.value);
+        const data = productResult.value;
         const categoryValues = getCollectionProductValues(matchedCategory, categoryId);
         const filteredProducts = data.filter((product) =>
             categoryValues.some((categoryValue) => matchesProductCategory(product, categoryValue)),
