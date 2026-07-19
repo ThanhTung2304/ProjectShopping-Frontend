@@ -42,7 +42,9 @@ export default function ChatWidget() {
           suggestedProducts: data.suggestedProducts || [],
         },
       ]);
-    } catch {
+    } catch (error) {
+      console.error("Chat API error:", error?.response?.status, error?.response?.data || error.message);
+
       setMessages((prev) => [
         ...prev,
         {
