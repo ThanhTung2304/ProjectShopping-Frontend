@@ -27,12 +27,18 @@ export default function ChatWidget() {
     if (!trimmed || loading) return;
 
     const userMessage = { role: "user", text: trimmed };
-    setMessages((prev) => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setInput("");
     setLoading(true);
 
     try {
-      const data = await sendChatMessage(trimmed); // { reply, suggestedProducts }
+      // Chuẩn hóa lịch sử gửi lên backend: chỉ role + text, bỏ suggestedProducts
+      const history = updatedMessages
+        .filter((m) => m.role === "user" || m.role === "bot")
+        .map((m) => ({ role: m.role, text: m.text }));
+
+      const data = await sendChatMessage(trimmed, history);
 
       setMessages((prev) => [
         ...prev,
