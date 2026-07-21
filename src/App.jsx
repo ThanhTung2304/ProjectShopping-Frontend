@@ -1,6 +1,6 @@
 import AppRouter from "./router";
 import ChatWidget from "./components/ChatWidget/ChatWidget";
-import { useLocation } from "react-router-dom";
+import { BrowserRouter, useLocation } from "react-router-dom";
 
 function ChatWidgetGate() {
   const location = useLocation();
@@ -12,10 +12,10 @@ function ChatWidgetGate() {
 }
 function App() {
   return (
-    <>
+    <BrowserRouter>
       <AppRouter />
       <ChatWidgetGate />
-    </>
+    </BrowserRouter>
   );
 }
 
