@@ -108,21 +108,20 @@ export default function ChatWidget() {
             <span>Tư vấn LEANH Studio</span>
             <div className={styles.headerActions}>
               <button
-                className={styles.clearBtn}
-                onClick={handleClearChat}
-                type="button"
-                aria-label="Xóa lịch sử trò chuyện"
-                title="Xóa lịch sử trò chuyện"
-              >
-                🗑
-              </button>
+              className={styles.clearBtn}
+              onClick={handleClearChat}
+              type="button"
+              aria-label="Xóa lịch sử"
+            >
+              <span>🗑️</span>
+            </button>
               <button
                 className={styles.closeBtn}
                 onClick={() => setIsOpen(false)}
                 type="button"
-                aria-label="Đóng chat"
+                aria-label="Đóng cửa sổ chat"
               >
-                ✕
+                <span>&times;</span>
               </button>
             </div>
           </div>
