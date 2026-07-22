@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { sendChatMessage } from "../../api/chatApi";
 import styles from "./ChatWidget.module.css";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const STORAGE_KEY = "leanh_chat_history";
 
@@ -136,9 +138,12 @@ export default function ChatWidget() {
                     : styles.botBubble
                 }
               >
-                <p className={styles.messageText}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  className={styles.markdown}
+                >
                   {msg.text}
-                </p>
+                </ReactMarkdown>
 
                 {msg.suggestedProducts?.length > 0 && (
                   <div className={styles.suggestedList}>
