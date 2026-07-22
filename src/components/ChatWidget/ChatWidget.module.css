@@ -255,4 +255,10 @@
     pointer-events: auto;
   }
 
+  .messageText {
+    margin: 0;
+    white-space: pre-line;
+    line-height: 1.7;
+    word-break: break-word;
+  }
 }

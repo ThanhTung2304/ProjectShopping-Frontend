@@ -131,10 +131,14 @@ export default function ChatWidget() {
               <div
                 key={idx}
                 className={
-                  msg.role === "user" ? styles.userBubble : styles.botBubble
+                  msg.role === "user"
+                    ? styles.userBubble
+                    : styles.botBubble
                 }
               >
-                <p>{msg.text}</p>
+                <p className={styles.messageText}>
+                  {msg.text}
+                </p>
 
                 {msg.suggestedProducts?.length > 0 && (
                   <div className={styles.suggestedList}>
