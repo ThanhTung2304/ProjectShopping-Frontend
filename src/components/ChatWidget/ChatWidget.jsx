@@ -2,14 +2,31 @@ import { useState, useRef, useEffect } from "react";
 import { sendChatMessage } from "../../api/chatApi";
 import styles from "./ChatWidget.module.css";
 
+const STORAGE_KEY = "leanh_chat_history";
+
+const DEFAULT_GREETING = {
+  role: "bot",
+  text: "Xin chào! Mình là trợ lý tư vấn của LEANH Studio. Bạn cần tìm sản phẩm gì hôm nay?",
+};
+
+const loadStoredMessages = () => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.error("Không thể đọc lịch sử chat từ localStorage:", err);
+  }
+  return [DEFAULT_GREETING];
+};
+
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      role: "bot",
-      text: "Xin chào! Mình là trợ lý tư vấn của LEANH Studio. Bạn cần tìm sản phẩm gì hôm nay?",
-    },
-  ]);
+  const [messages, setMessages] = useState(loadStoredMessages);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -22,6 +39,14 @@ export default function ChatWidget() {
     scrollToBottom();
   }, [messages, isOpen]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    } catch (err) {
+      console.error("Không thể lưu lịch sử chat vào localStorage:", err);
+    }
+  }, [messages]);
+
   const sendMessage = async () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
@@ -33,7 +58,6 @@ export default function ChatWidget() {
     setLoading(true);
 
     try {
-      // Chuẩn hóa lịch sử gửi lên backend: chỉ role + text, bỏ suggestedProducts
       const history = updatedMessages
         .filter((m) => m.role === "user" || m.role === "bot")
         .map((m) => ({ role: m.role, text: m.text }));
@@ -70,20 +94,37 @@ export default function ChatWidget() {
     }
   };
 
+  const handleClearChat = () => {
+    if (!window.confirm("Bạn muốn xóa toàn bộ lịch sử trò chuyện?")) return;
+    setMessages([DEFAULT_GREETING]);
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
   return (
     <div className={styles.wrapper}>
       {isOpen && (
         <div className={styles.chatWindow}>
           <div className={styles.header}>
             <span>Tư vấn LEANH Studio</span>
-            <button
-              className={styles.closeBtn}
-              onClick={() => setIsOpen(false)}
-              type="button"
-              aria-label="Đóng chat"
-            >
-              ✕
-            </button>
+            <div className={styles.headerActions}>
+              <button
+                className={styles.clearBtn}
+                onClick={handleClearChat}
+                type="button"
+                aria-label="Xóa lịch sử trò chuyện"
+                title="Xóa lịch sử trò chuyện"
+              >
+                🗑
+              </button>
+              <button
+                className={styles.closeBtn}
+                onClick={() => setIsOpen(false)}
+                type="button"
+                aria-label="Đóng chat"
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
           <div className={styles.messages}>
