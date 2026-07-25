@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import notificationApi from "../../../api/notificationApi";
+import { AuthContext } from "../../../context/authContextValue";
+import useNotificationSocket from "../../../hooks/useNotificationSocket";
 import styles from "./NotificationDropdown.module.css";
 
-const ORDER_TYPES = new Set(["ORDER_STATUS_UPDATED", "ORDER_CANCELLED", "ORDER_DELIVERED"]);
+const ORDER_TYPES = new Set(["ORDER_STATUS_UPDATED", "ORDER_CANCELLED", "ORDER_DELIVERED", "NEW_ORDER"]);
 const ORDER_STATUS_LABELS = {
   PENDING: "Chờ xác nhận",
   CONFIRMED: "Đã xác nhận",
@@ -33,6 +35,7 @@ const formatTime = (value) => {
 export default function NotificationDropdown({ isAuthenticated, className = "", iconClassName = "" }) {
   const navigate = useNavigate();
   const wrapperRef = useRef(null);
+  const { user } = useContext(AuthContext); // cần user.email để kết nối đúng kênh WebSocket riêng
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -73,6 +76,8 @@ export default function NotificationDropdown({ isAuthenticated, className = "", 
     void fetchUnreadCount();
     if (!isAuthenticated) return undefined;
 
+    // Vẫn giữ polling làm lưới an toàn dự phòng — nếu WebSocket bị rớt tạm thời,
+    // dữ liệu vẫn được đồng bộ lại chậm nhất sau 60 giây, không bị "mất" hẳn.
     const intervalId = window.setInterval(fetchUnreadCount, 60000);
     return () => window.clearInterval(intervalId);
   }, [fetchUnreadCount, isAuthenticated]);
@@ -94,6 +99,21 @@ export default function NotificationDropdown({ isAuthenticated, className = "", 
     document.addEventListener("mousedown", handleMouseDown);
     return () => document.removeEventListener("mousedown", handleMouseDown);
   }, []);
+
+  // Nhận thông báo real-time qua WebSocket — chạy ngay khi server đẩy tin,
+  // không cần đợi tới lần polling tiếp theo.
+  const handleRealtimeNotification = useCallback((notification) => {
+    setNotifications((prev) => {
+      // Tránh trùng lặp nếu vì lý do nào đó nhận 2 lần cùng 1 thông báo
+      if (prev.some((item) => item.id === notification.id)) {
+        return prev;
+      }
+      return [notification, ...prev].slice(0, 8); // giữ đúng số lượng hiển thị như khi fetch
+    });
+    setUnreadCount((count) => count + 1);
+  }, []);
+
+  useNotificationSocket(isAuthenticated ? user?.email : null, handleRealtimeNotification);
 
   const handleToggle = () => {
     if (!isAuthenticated) {
