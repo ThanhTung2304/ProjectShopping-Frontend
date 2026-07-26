@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./HomePage.module.css";
-import productApi from "../../../api/productApi"; // Import API service
+import productApi from "../../../api/productApi";
 import {
   formatCurrency,
   FALLBACK_PRODUCT_IMAGE,
@@ -9,36 +9,7 @@ import {
   getProductImage,
   getProductPathId,
   getProductPrice,
-  getResponseItem,
 } from "../../../utils/productUtils";
-
-const FEATURED_PRODUCTS_KEY = "featuredProductIds";
-
-const getStoredFeaturedProductIds = () => {
-  try {
-    return JSON.parse(localStorage.getItem(FEATURED_PRODUCTS_KEY) || "[]").map(String);
-  } catch {
-    return [];
-  }
-};
-
-const isFeaturedProduct = (product) =>
-  product?.featured || product?.isFeatured || product?.is_featured || product?.bestSeller;
-
-const getFeaturedProductKeys = (product) =>
-  [product?.id, product?._id, product?.slug].filter(Boolean).map(String);
-
-const hydrateProductsWithImages = async (items) =>
-  Promise.all(
-    items.map(async (product) => {
-      try {
-        const detail = getResponseItem(await productApi.getById(getProductId(product)));
-        return detail ? { ...product, ...detail } : product;
-      } catch {
-        return product;
-      }
-    }),
-  );
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -52,34 +23,8 @@ export default function HomePage() {
       setLoading(true);
       setError(null);
       try {
-        // Gọi API để lấy các sản phẩm nổi bật
-        // Giả định backend hỗ trợ filter theo 'featured=true'
-        const response = await productApi.getAllPages();
-        
-        let data = response;
-        if (data.length === 0) {
-          data = await productApi.getAllPages();
-        }
-        if (Array.isArray(data)) {
-          const hydratedProducts = await hydrateProductsWithImages(data);
-          const storedFeaturedIds = getStoredFeaturedProductIds();
-          let featuredOnly = hydratedProducts.filter((product) => {
-            const productKeys = getFeaturedProductKeys(product);
-            return isFeaturedProduct(product) || productKeys.some((key) => storedFeaturedIds.includes(key));
-          });
-
-          if (featuredOnly.length === 0) {
-            const allProducts = await hydrateProductsWithImages(await productApi.getAllPages());
-            featuredOnly = allProducts.filter((product) => {
-              const productKeys = getFeaturedProductKeys(product);
-              return isFeaturedProduct(product) || productKeys.some((key) => storedFeaturedIds.includes(key));
-            });
-          }
-
-          setFeaturedProducts(featuredOnly);
-        } else {
-          setError(response.message || "Không thể tải sản phẩm nổi bật.");
-        }
+        const response = await productApi.getFeatured();
+        setFeaturedProducts(response?.data || []);
       } catch (err) {
         setError("Đã xảy ra lỗi khi tải sản phẩm nổi bật.");
         console.error("Error fetching featured products:", err);
@@ -92,10 +37,8 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    // Chỉ chạy hiệu ứng IntersectionObserver khi có sản phẩm
     if (featuredProducts.length === 0 && !loading) return;
 
-    // Tạo bản sao của mảng ref hiện tại để tránh thay đổi trong quá trình quan sát
     const currentCards = [...cardRefs.current];
     const observers = currentCards.map((card, i) => {
       if (!card) return null;
@@ -115,11 +58,10 @@ export default function HomePage() {
     });
 
     return () => observers.forEach((obs) => obs && obs.disconnect());
-  }, [featuredProducts, loading]); // Re-run khi featuredProducts thay đổi
+  }, [featuredProducts, loading]);
 
   return (
     <div className={styles.root}>
-      {/* Hero */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
           <p className={styles.subtitle}>NEW COLLECTION 2026</p>
@@ -143,14 +85,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Products */}
       <section className={styles.products}>
         <div className={styles.sectionHeader}>
           <h2>Sản phẩm nổi bật</h2>
-          <button
-            className={styles.seeAllBtn}
-            onClick={() => navigate("/products")}
-          >
+          <button className={styles.seeAllBtn} onClick={() => navigate("/products")}>
             Xem tất cả →
           </button>
         </div>
@@ -181,14 +119,11 @@ export default function HomePage() {
                       event.currentTarget.src = FALLBACK_PRODUCT_IMAGE;
                     }}
                   />
-                  {isFeaturedProduct(product) && (
-                    <span className={styles.featuredBadge}>Nổi bật</span>
-                  )}
+                  <span className={styles.featuredBadge}>Nổi bật</span>
                   <button
                     className={styles.quickAdd}
                     onClick={(e) => {
                       e.stopPropagation();
-                      // handle add to cart
                     }}
                   >
                     + Thêm vào giỏ
@@ -196,13 +131,10 @@ export default function HomePage() {
                 </div>
 
                 <div className={styles.cardBody}>
-                  <p className={styles.cardTag}>{product.tag || product.categoryName || "Chưa phân loại"}</p>
+                  <p className={styles.cardTag}>{product.categoryName || "Chưa phân loại"}</p>
                   <h3>{product.name}</h3>
                   <div className={styles.priceRow}>
                     <p className={styles.price}>{formatCurrency(getProductPrice(product))}</p>
-                    {product.oldPrice && (
-                      <span className={styles.oldPrice}>{product.oldPrice?.toLocaleString()} VNĐ</span>
-                    )}
                   </div>
                 </div>
               </div>

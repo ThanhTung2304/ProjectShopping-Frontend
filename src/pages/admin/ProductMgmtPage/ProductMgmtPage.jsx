@@ -39,7 +39,6 @@ const initialImage = {
   isNew: true,
 };
 
-const FEATURED_PRODUCTS_KEY = "featuredProductIds";
 const SIZE_TYPE_OPTIONS = [
   { value: "CLOTHING", label: "Ao / Quan ao", sizes: ["S", "M", "L", "XL", "XXL"] },
   { value: "PANTS", label: "Quan", sizes: ["28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38"] },
@@ -91,38 +90,6 @@ const fetchProductList = async () => {
   );
 };
 
-const getStoredFeaturedProductIds = () => {
-  try {
-    return JSON.parse(localStorage.getItem(FEATURED_PRODUCTS_KEY) || "[]");
-  } catch {
-    return [];
-  }
-};
-
-const saveStoredFeaturedProductIds = (ids) => {
-  localStorage.setItem(FEATURED_PRODUCTS_KEY, JSON.stringify([...new Set(ids.map(String))]));
-};
-
-const syncStoredFeaturedProduct = (product, isFeatured) => {
-  const keys = [getId(product), product?.slug, product?.previousSlug].filter(Boolean).map(String);
-  if (keys.length === 0) return;
-
-  const currentIds = getStoredFeaturedProductIds();
-  const nextIds = isFeatured
-    ? [...currentIds, ...keys]
-    : currentIds.filter((id) => !keys.includes(String(id)));
-
-  saveStoredFeaturedProductIds(nextIds);
-};
-
-const isStoredFeaturedProduct = (product) => {
-  const keys = [getId(product), product?.slug].filter(Boolean).map(String);
-  if (keys.length === 0) return false;
-
-  const storedIds = getStoredFeaturedProductIds().map(String);
-  return keys.some((key) => storedIds.includes(key));
-};
-
 const flattenCategories = (items = []) =>
   items.flatMap((category) => [category, ...flattenCategories(category.children || [])]);
 
@@ -143,8 +110,7 @@ const getCategoryId = (product, categories = []) =>
 const getActiveValue = (item) => item?.isActive ?? item?.is_active ?? item?.active ?? true;
 
 const getFeaturedValue = (product) =>
-  Boolean(product?.featured ?? product?.isFeatured ?? product?.is_featured ?? product?.bestSeller ?? false) ||
-  isStoredFeaturedProduct(product);
+  Boolean(product?.isFeatured ?? false);
 
 const getImageUrl = (image) => {
   if (!image) return "";
@@ -218,9 +184,7 @@ const buildProductPayload = (form) => ({
   description: form.description.trim(),
   categoryId: Number(form.categoryId),
   sizeType: form.sizeType || "CLOTHING",
-  featured: form.featured,
   isFeatured: form.featured,
-  bestSeller: form.featured,
   isActive: form.isActive,
 });
 
@@ -504,41 +468,41 @@ export default function ProductMgmtPage() {
     }
   };
 
-const syncProductImages = async (productId, imageForm) => {
-  if (!productId) return;
+  const syncProductImages = async (productId, imageForm) => {
+    if (!productId) return;
 
-  await Promise.all(
-    [...new Set(imageForm.deletedImageIds.filter(Boolean))].map((imageId) =>
-      productApi.deleteImage(productId, imageId),
-    ),
-  );
+    await Promise.all(
+      [...new Set(imageForm.deletedImageIds.filter(Boolean))].map((imageId) =>
+        productApi.deleteImage(productId, imageId),
+      ),
+    );
 
-  const imagesToUpload = imageForm.images.filter((image) => image.file);
-  const uploadedImages = await Promise.all(
-    imagesToUpload.map(async (image) => {
-      const uploaded = getItem(
-        await productApi.uploadImage(productId, {
-          file: image.file,
-          isPrimary: image.isPrimary,
-          sortOrder: image.sortOrder,
-        }),
-      );
-      return {
-        formKey: String(image.id || image.tempId),
-        id: getId(uploaded),
-      };
-    }),
-  );
+    const imagesToUpload = imageForm.images.filter((image) => image.file);
+    const uploadedImages = await Promise.all(
+      imagesToUpload.map(async (image) => {
+        const uploaded = getItem(
+          await productApi.uploadImage(productId, {
+            file: image.file,
+            isPrimary: image.isPrimary,
+            sortOrder: image.sortOrder,
+          }),
+        );
+        return {
+          formKey: String(image.id || image.tempId),
+          id: getId(uploaded),
+        };
+      }),
+    );
 
-  const primaryImage = imageForm.images.find((image) => image.isPrimary);
-  const primaryKey = primaryImage ? String(primaryImage.id || primaryImage.tempId) : "";
-  const uploadedPrimary = uploadedImages.find((image) => image.formKey === primaryKey);
-  const primaryImageId = primaryImage?.id || uploadedPrimary?.id;
+    const primaryImage = imageForm.images.find((image) => image.isPrimary);
+    const primaryKey = primaryImage ? String(primaryImage.id || primaryImage.tempId) : "";
+    const uploadedPrimary = uploadedImages.find((image) => image.formKey === primaryKey);
+    const primaryImageId = primaryImage?.id || uploadedPrimary?.id;
 
-  if (primaryImageId) {
-    await productApi.setPrimaryImage(productId, primaryImageId);
-  }
-};
+    if (primaryImageId) {
+      await productApi.setPrimaryImage(productId, primaryImageId);
+    }
+  };
 
   const validateForm = () => {
     if (modalMode === "edit" && !getId(editingProduct)) return "Không tìm thấy mã sản phẩm để cập nhật.";
@@ -577,10 +541,6 @@ const syncProductImages = async (productId, imageForm) => {
           form.variants.map((variant) => productApi.addVariant(createdProductId, buildVariantPayload(variant))),
         );
         await syncProductImages(createdProductId, form);
-        syncStoredFeaturedProduct(
-          { ...createdProduct, slug: createdProduct?.slug || form.slug || generateSlug(form.name) },
-          form.featured,
-        );
       } else {
         const productId = getId(editingProduct);
         const existingVariants = form.variants.filter((variant) => variant.id);
@@ -590,14 +550,6 @@ const syncProductImages = async (productId, imageForm) => {
           existingVariants.map((variant) => productApi.updateVariant(variant.id, buildVariantPayload(variant))),
         );
         await syncProductImages(productId, form);
-        syncStoredFeaturedProduct(
-          {
-            ...editingProduct,
-            slug: form.slug || editingProduct?.slug,
-            previousSlug: editingProduct?.slug,
-          },
-          form.featured,
-        );
       }
 
       await loadProducts();
