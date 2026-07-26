@@ -62,6 +62,7 @@ export const getProductImage = (product, fallback = FALLBACK_PRODUCT_IMAGE) => {
     product?.image,
     product?.imageUrl,
     product?.image_url,
+    product?.primaryImageUrl,
     product?.productImage,
     product?.productImageUrl,
     product?.thumbnail,
