@@ -168,7 +168,7 @@ export default function Header() {
         <div className={styles.sidebarHeader}>
           <div>
             <p className={styles.sidebarEyebrow}>LEANH STUDIO</p>
-            <h2>Tài khoản</h2>
+            <h2>MENU</h2>
           </div>
           <button
             className={styles.closeBtn}
