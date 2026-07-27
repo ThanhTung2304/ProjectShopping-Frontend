@@ -82,6 +82,17 @@ export default function Header() {
                 showButton={false}
               />
 
+              {isSearchExpanded && (
+                <button
+                  type="button"
+                  className={styles.searchClose}
+                  aria-label="Đóng tìm kiếm"
+                  onClick={() => setIsSearchExpanded(false)}
+                >
+                  ×
+                </button>
+              )}
+
               <button
                 className={styles.searchToggle}
                 type="button"
