@@ -180,6 +180,33 @@ export default function Header() {
           </button>
         </div>
 
+        <nav className={styles.sidebarNav}>
+          <Link
+            to="/home"
+            className={`${styles.sidebarNavLink} ${isActive("/") || isActive("/home") ? styles.active : ""}`}
+          >
+            Trang chủ
+          </Link>
+          <Link
+            to="/products"
+            className={`${styles.sidebarNavLink} ${isActive("/products") ? styles.active : ""}`}
+          >
+            Cửa hàng
+          </Link>
+          <Link
+            to="/collections"
+            className={`${styles.sidebarNavLink} ${isActive("/collections") ? styles.active : ""}`}
+          >
+            Bộ sưu tập
+          </Link>
+          <Link
+            to="/vouchers"
+            className={`${styles.sidebarNavLink} ${isActive("/vouchers") ? styles.active : ""}`}
+          >
+            Ưu đãi
+          </Link>
+        </nav>
+
         <div className={styles.sidebarActions}>
           <Link to={isAuthenticated ? "/profile" : "/auth"} className={styles.sidebarAction}>
             {isAuthenticated ? "Tài khoản" : "Đăng nhập"}

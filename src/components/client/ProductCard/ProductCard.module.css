@@ -65,3 +65,11 @@
 }
 
 .price { font-weight: 600; font-size: 0.95rem; }
+
+/* Trên thiết bị cảm ứng (không có hover thật), luôn hiện nút "Thêm vào giỏ" thay vì ẩn chờ hover */
+@media (hover: none) {
+  .quickAdd {
+    position: static;
+    margin-top: 8px;
+  }
+}

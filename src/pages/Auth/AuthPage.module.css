@@ -14,6 +14,8 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
 }
 
 .leftPanel::before {
@@ -375,6 +377,16 @@
 
   .rightPanel {
     padding: 2rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .inputRow {
+    grid-template-columns: 1fr;
+  }
+
+  .rightPanel {
+    padding: 1.5rem 1.25rem;
   }
 }
 
