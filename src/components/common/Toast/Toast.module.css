@@ -25,3 +25,21 @@
   }
   to { transform: translateX(0); opacity: 1; }
 }
+
+@media (max-width: 480px) {
+  .toast {
+    top: auto;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    width: auto;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}
