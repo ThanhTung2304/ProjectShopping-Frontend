@@ -468,41 +468,87 @@ export default function ProductMgmtPage() {
     }
   };
 
-  const syncProductImages = async (productId, imageForm) => {
-    if (!productId) return;
+    const syncProductImages = async (productId, imageForm) => {
+      if (!productId) return;
 
-    await Promise.all(
-      [...new Set(imageForm.deletedImageIds.filter(Boolean))].map((imageId) =>
-        productApi.deleteImage(productId, imageId),
-      ),
-    );
+      // 1. Xóa từng ảnh tuần tự để tránh nhiều request cùng sửa ảnh chính
+      const deletedImageIds = [
+        ...new Set(imageForm.deletedImageIds.filter(Boolean)),
+      ];
 
-    const imagesToUpload = imageForm.images.filter((image) => image.file);
-    const uploadedImages = await Promise.all(
-      imagesToUpload.map(async (image) => {
+      for (const imageId of deletedImageIds) {
+        await productApi.deleteImage(productId, imageId);
+      }
+
+      // 2. Upload từng ảnh tuần tự, không dùng Promise.all
+      const imagesToUpload = imageForm.images.filter((image) => image.file);
+      const uploadedImages = [];
+
+      for (const image of imagesToUpload) {
         const uploaded = getItem(
           await productApi.uploadImage(productId, {
             file: image.file,
-            isPrimary: image.isPrimary,
+
+            // Không đặt ảnh chính trong lúc upload.
+            // Sẽ đặt chính xác một lần ở bước cuối.
+            isPrimary: false,
+
             sortOrder: image.sortOrder,
           }),
         );
-        return {
+
+        const uploadedImageId = getId(uploaded);
+
+        if (!uploadedImageId) {
+          throw new Error(
+            `Backend không trả về mã ảnh ở vị trí ${Number(image.sortOrder) + 1}.`,
+          );
+        }
+
+        uploadedImages.push({
           formKey: String(image.id || image.tempId),
-          id: getId(uploaded),
-        };
-      }),
-    );
+          id: uploadedImageId,
+        });
+      }
 
-    const primaryImage = imageForm.images.find((image) => image.isPrimary);
-    const primaryKey = primaryImage ? String(primaryImage.id || primaryImage.tempId) : "";
-    const uploadedPrimary = uploadedImages.find((image) => image.formKey === primaryKey);
-    const primaryImageId = primaryImage?.id || uploadedPrimary?.id;
+      // 3. Tìm ảnh được người dùng chọn làm ảnh chính
+      const primaryImage = imageForm.images.find(
+        (image) => Boolean(image.isPrimary),
+      );
 
-    if (primaryImageId) {
-      await productApi.setPrimaryImage(productId, primaryImageId);
-    }
-  };
+      if (!primaryImage) return;
+
+      const primaryKey = String(
+        primaryImage.id || primaryImage.tempId || "",
+      );
+
+      // Ảnh cũ đã tồn tại trong database
+      let primaryImageId = primaryImage.id;
+
+      // Nếu là ảnh mới, lấy ID backend vừa trả về
+      if (!primaryImageId) {
+        const uploadedPrimary = uploadedImages.find(
+          (image) => image.formKey === primaryKey,
+        );
+
+        primaryImageId = uploadedPrimary?.id;
+      }
+
+      // 4. Chỉ đặt ảnh chính một lần sau khi upload xong toàn bộ
+      if (primaryImageId) {
+        await productApi.setPrimaryImage(productId, primaryImageId);
+      }
+    };
+
+  //   const primaryImage = imageForm.images.find((image) => image.isPrimary);
+  //   const primaryKey = primaryImage ? String(primaryImage.id || primaryImage.tempId) : "";
+  //   const uploadedPrimary = uploadedImages.find((image) => image.formKey === primaryKey);
+  //   const primaryImageId = primaryImage?.id || uploadedPrimary?.id;
+
+  //   if (primaryImageId) {
+  //     await productApi.setPrimaryImage(productId, primaryImageId);
+  //   }
+  // };
 
   const validateForm = () => {
     if (modalMode === "edit" && !getId(editingProduct)) return "Không tìm thấy mã sản phẩm để cập nhật.";
