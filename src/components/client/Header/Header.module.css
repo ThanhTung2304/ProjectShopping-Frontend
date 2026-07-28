@@ -153,9 +153,9 @@
   justify-self: end;
 }
 
-.searchField {
-  width: clamp(180px, 20vw, 300px);
-  flex-shrink: 0;
+.searchField{
+    width:340px;
+    flex-shrink:0;
 }
 
 .searchToggle {
@@ -609,7 +609,7 @@
   }
 
   .searchFieldOpen {
-    width: clamp(180px, 22vw, 240px);
+    width:360px;
     filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.06));
   }
 
@@ -685,17 +685,21 @@
     letter-spacing: 1px;
   }
 
-  .searchFieldOpen {
-    position: absolute;
-    inset: 0;
+  .searchFieldOpen{
+    position:absolute;
 
-    display: flex;
-    align-items: center;
+    left:16px;
+    right:16px;
+    top:50%;
 
-    padding: 0 16px;
+    transform:translateY(-50%);
 
-    background: #fff;
-    z-index: 20;
+    display:flex;
+    align-items:center;
+
+    background:#fff;
+
+    z-index:20;
   }
 
   .searchFieldOpen form {
