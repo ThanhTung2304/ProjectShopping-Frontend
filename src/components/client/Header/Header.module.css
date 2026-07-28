@@ -309,18 +309,29 @@
 
 .cartBtn {
   position: relative;
+
   width: 42px;
   height: 42px;
-  flex-shrink: 0;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
+  flex-shrink: 0;
+
   border: 1px solid #ececec;
   border-radius: 50%;
+
   background: #fff;
   color: #444;
   text-decoration: none;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+
+  overflow: visible;
+
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
 }
 
 .cartBtn:hover {
