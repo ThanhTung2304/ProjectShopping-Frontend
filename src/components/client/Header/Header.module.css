@@ -526,6 +526,14 @@
 }
 
 /* =========================
+   SEARCH CLOSE (mobile)
+========================= */
+
+.searchClose {
+  display: none;
+}
+
+/* =========================
    RESPONSIVE
 ========================= */
 
@@ -618,7 +626,7 @@
   }
 }
 
-/* @media (max-width: 768px) {
+@media (max-width: 768px) {
   .container {
     grid-template-columns: minmax(0, 1fr) auto;
   }
@@ -631,21 +639,12 @@
     gap: 12px;
   }
 
-  .searchFieldOpen {
-    width: min(230px, calc(100vw - 148px));
-  }
-
   .iconBtn,
   .logoutBtn {
     font-size: 0.75rem;
     letter-spacing: 1px;
-  } */
+  }
 
-  .searchClose {
-  display: none;
-}
-
-@media (max-width: 768px) {
   .searchFieldOpen {
     position: absolute;
     inset: 0;
@@ -678,5 +677,4 @@
     color: #111;
     cursor: pointer;
   }
-
 }
