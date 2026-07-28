@@ -63,8 +63,28 @@ export default function SearchBar({
         onBlur={handleBlur}
         onChange={handleChange}
       />
+
+      {query && (
+        <button
+          type="button"
+          className={styles.clearBtn}
+          onClick={() => {
+            setQuery("");
+            inputRef.current?.focus();
+            onSearch?.("");
+          }}
+          aria-label="Xóa tìm kiếm"
+        >
+          ×
+        </button>
+      )}
+
       {showButton && (
-        <button type="submit" className={styles.searchBtn} aria-label="Tìm kiếm">
+        <button
+          type="submit"
+          className={styles.searchBtn}
+          aria-label="Tìm kiếm"
+        >
           <span aria-hidden="true">⌕</span>
         </button>
       )}
