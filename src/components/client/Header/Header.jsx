@@ -142,15 +142,20 @@ export default function Header() {
               iconClassName={styles.headerIcon}
             />
 
-            <Link to={isAuthenticated ? "/cart" : "/auth"} className={styles.iconBtn}>
+            <Link
+              to={isAuthenticated ? "/cart" : "/auth"}
+              className={styles.cartBtn}
+              aria-label={`Giỏ hàng${cartCount > 0 ? ` (${cartCount} sản phẩm)` : ""}`}
+            >
               <span className={styles.headerIcon} aria-hidden="true">
                 <svg viewBox="0 0 24 24" focusable="false">
                   <path d="M6 8h12l-1 12H7L6 8Z" />
                   <path d="M9 8a3 3 0 0 1 6 0" />
                 </svg>
               </span>
-              <span className={styles.visuallyHidden}>Giỏ hàng</span>
-              <span className={styles.cartBadge}>{cartCount}</span>
+              {cartCount > 0 && (
+                <span className={styles.cartBadge}>{cartCount > 99 ? "99+" : cartCount}</span>
+              )}
             </Link>
 
             <button
