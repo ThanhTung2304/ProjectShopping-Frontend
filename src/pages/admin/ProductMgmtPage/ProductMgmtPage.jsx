@@ -121,50 +121,60 @@ const getImageUrl = (image) => {
 const getProductImages = (product) => {
   if (!product) return [];
 
-  // Nếu API danh sách chỉ trả ảnh đại diện
+  const images = []
+    .concat(Array.isArray(product?.images) ? product.images : [])
+    .concat(Array.isArray(product?.productImages) ? product.productImages : [])
+    .concat(Array.isArray(product?.product_images) ? product.product_images : [])
+    .concat([product?.image, product?.img, product?.thumbnail].filter(Boolean));
+
+  // Nếu có danh sách ảnh thì dùng luôn
+  if (images.length > 0) {
+    const normalizedImages = images
+      .map((image, index) => ({
+        id: typeof image === "object" ? getId(image) : undefined,
+        tempId: `image-${index}-${Date.now()}`,
+        file: null,
+        imageUrl: getImageUrl(image),
+        previewUrl: getImageUrl(image),
+        isPrimary:
+          typeof image === "object"
+            ? image?.isPrimary ?? image?.is_primary ?? false
+            : index === 0,
+        sortOrder: Number(
+          typeof image === "object"
+            ? image?.sortOrder ?? image?.sort_order ?? index
+            : index,
+        ),
+        isNew: false,
+      }))
+      .filter((image) => image.imageUrl);
+
+    return normalizedImages.sort((a, b) => {
+      if (a.isPrimary !== b.isPrimary) {
+        return a.isPrimary ? -1 : 1;
+      }
+
+      return Number(a.sortOrder || 0) - Number(b.sortOrder || 0);
+    });
+  }
+
+  // Chỉ fallback khi API chỉ trả primaryImageUrl
   if (product.primaryImageUrl) {
     return [
       {
+        id: undefined,
+        tempId: `primary-${getId(product)}`,
+        file: null,
         imageUrl: product.primaryImageUrl,
+        previewUrl: product.primaryImageUrl,
         isPrimary: true,
         sortOrder: 0,
+        isNew: false,
       },
     ];
   }
 
-  const images = []
-    .concat(Array.isArray(product.images) ? product.images : [])
-    .concat(Array.isArray(product.productImages) ? product.productImages : [])
-    .concat(Array.isArray(product.product_images) ? product.product_images : [])
-    .concat([product.image, product.img, product.thumbnail].filter(Boolean));
-
-  const normalizedImages = images
-    .map((image, index) => ({
-      id: typeof image === "object" ? getId(image) : undefined,
-      tempId: `image-${index}-${Date.now()}`,
-      file: null,
-      imageUrl: getImageUrl(image),
-      previewUrl: getImageUrl(image),
-      isPrimary:
-        typeof image === "object"
-          ? image?.isPrimary ?? image?.is_primary ?? false
-          : index === 0,
-      sortOrder: Number(
-        typeof image === "object"
-          ? image?.sortOrder ?? image?.sort_order ?? index
-          : index,
-      ),
-      isNew: false,
-    }))
-    .filter((image) => image.imageUrl);
-
-  return normalizedImages.sort((a, b) => {
-    if (a.isPrimary !== b.isPrimary) {
-      return a.isPrimary ? -1 : 1;
-    }
-
-    return Number(a.sortOrder || 0) - Number(b.sortOrder || 0);
-  });
+  return [];
 };
 
 const loadProductImages = async (productId) => getProductImages({ images: getList(await productApi.getImages(productId)) });
