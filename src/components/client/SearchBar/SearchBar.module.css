@@ -5,9 +5,9 @@
   align-items: center;
 
   width: 100%;
-  height: 42px;
+  height: 40px;
 
-  padding: 0 14px;
+  padding: 0 12px;
 
   border: 1px solid #d8d8d8;
   border-radius: 999px;
@@ -30,9 +30,9 @@
 
   background: transparent;
 
-  padding: 8px 40px 8px 12px;
+  padding: 8px 36px 8px 12px;
 
-  font-size: .9rem;
+  font-size: 0.88rem;
   color: #111;
 
   font-family: inherit;
@@ -76,32 +76,35 @@
   transform: scale(1.1);
 }
 
-.clearBtn{
-    position:absolute;
+.clearBtn {
+  position: absolute;
 
-    top:50%;
-    right:14px;
+  top: 50%;
+  right: 10px;
 
-    transform:translateY(-50%);
+  transform: translateY(-50%);
 
-    width:26px;
-    height:26px;
+  width: 20px;
+  height: 20px;
 
-    border:none;
-    background:none;
+  border: none;
+  background: transparent;
 
-    cursor:pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+  cursor: pointer;
 
-    color:#888;
-    font-size:20px;
+  color: #999;
+  font-size: 18px;
+  line-height: 1;
+
+  padding: 0;
 }
 
-.clearBtn:hover{
-    color:#111;
+.clearBtn:hover {
+  color: #111;
 }
 
 .clearBtnVisible {
