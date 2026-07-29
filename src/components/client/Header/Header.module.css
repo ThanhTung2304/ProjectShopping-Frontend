@@ -153,9 +153,9 @@
   justify-self: end;
 }
 
-.searchField{
-    width:340px;
-    flex-shrink:0;
+.searchField {
+  width: clamp(180px, 20vw, 300px);
+  flex-shrink: 0;
 }
 
 .searchToggle {
@@ -609,7 +609,7 @@
   }
 
   .searchFieldOpen {
-    width:360px;
+    width:280px;
     filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.06));
   }
 
@@ -662,7 +662,7 @@
   }
 
   .searchFieldOpen {
-    width: clamp(160px, 20vw, 200px);
+    width: 240px;
   }
 }
 
@@ -685,36 +685,25 @@
     letter-spacing: 1px;
   }
 
-  .searchFieldOpen{
-    position:absolute;
+  .searchFieldOpen {
+    position: absolute;
 
-    left:16px;
-    right:16px;
-    top:50%;
+    left: calc(100px + 8px);
+    right: calc(42px * 3 + 16px * 3);
 
-    transform:translateY(-50%);
+    top: 50%;
+    transform: translateY(-50%);
 
-    display:flex;
-    align-items:center;
+    display: flex;
+    align-items: center;
 
-    background:#fff;
-
-    z-index:20;
+    z-index: 20;
   }
 
   .searchFieldOpen form {
-    flex: 1;
     width: 100%;
-    max-width: none;
-    transform: none;
-  }
-
-  .searchFieldOpen form {
     flex: 1;
-    width: 100%;
-    max-width: none;
   }
-
   .searchFieldOpen .searchBar {
     width: 100%;
   }
