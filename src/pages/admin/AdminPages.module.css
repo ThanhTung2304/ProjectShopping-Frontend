@@ -822,3 +822,39 @@
   background: #fffdf8;
   padding: 14px;
 }
+
+.imageCell{
+    width:90px;
+}
+
+.productThumb{
+    width:60px;
+    height:60px;
+
+    object-fit:cover;
+
+    border-radius:12px;
+
+    border:1px solid #E5E7EB;
+
+    background:#F8FAFC;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.noImage{
+    width:60px;
+    height:60px;
+
+    border-radius:12px;
+
+    background:#F1F5F9;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:#94A3B8;
+
+    font-size:12px;
+}

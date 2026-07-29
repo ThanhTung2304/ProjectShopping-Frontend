@@ -664,6 +664,7 @@ export default function ProductMgmtPage() {
             <table className={styles.table}>
               <thead>
                 <tr>
+                  <th>Ảnh</th>
                   <th>Tên sản phẩm</th>
                   <th>Danh mục</th>
                   <th>Giá</th>
@@ -675,9 +676,28 @@ export default function ProductMgmtPage() {
               <tbody>
                 {filteredProducts.map((product) => {
                   const isActive = getActiveValue(product);
+                  const productImages = getProductImages(product);
+
+                  const thumbnail =
+                    productImages.find((image) => image.isPrimary)?.imageUrl ||
+                    productImages[0]?.imageUrl ||
+                    "";
 
                   return (
                     <tr key={getId(product)}>
+                      <td className={styles.imageCell}>
+                        {thumbnail ? (
+                          <img
+                            src={thumbnail}
+                            alt={product.name}
+                            className={styles.productThumb}
+                          />
+                        ) : (
+                          <div className={styles.noImage}>
+                            Không ảnh
+                          </div>
+                        )}
+                      </td>
                       <td className={styles.nameCell}>{product.name}</td>
                       <td>{safeText(product.categoryName || product.category?.name)}</td>
                       <td>{getProductDisplayPrice(product)}</td>
