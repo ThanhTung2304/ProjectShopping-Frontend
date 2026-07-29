@@ -119,11 +119,24 @@ const getImageUrl = (image) => {
 };
 
 const getProductImages = (product) => {
+  if (!product) return [];
+
+  // Nếu API danh sách chỉ trả ảnh đại diện
+  if (product.primaryImageUrl) {
+    return [
+      {
+        imageUrl: product.primaryImageUrl,
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ];
+  }
+
   const images = []
-    .concat(Array.isArray(product?.images) ? product.images : [])
-    .concat(Array.isArray(product?.productImages) ? product.productImages : [])
-    .concat(Array.isArray(product?.product_images) ? product.product_images : [])
-    .concat([product?.image, product?.img, product?.thumbnail].filter(Boolean));
+    .concat(Array.isArray(product.images) ? product.images : [])
+    .concat(Array.isArray(product.productImages) ? product.productImages : [])
+    .concat(Array.isArray(product.product_images) ? product.product_images : [])
+    .concat([product.image, product.img, product.thumbnail].filter(Boolean));
 
   const normalizedImages = images
     .map((image, index) => ({
@@ -132,19 +145,25 @@ const getProductImages = (product) => {
       file: null,
       imageUrl: getImageUrl(image),
       previewUrl: getImageUrl(image),
-      isPrimary: typeof image === "object" ? image?.isPrimary ?? image?.is_primary ?? false : index === 0,
-      sortOrder: Number(typeof image === "object" ? image?.sortOrder ?? image?.sort_order ?? index : index),
+      isPrimary:
+        typeof image === "object"
+          ? image?.isPrimary ?? image?.is_primary ?? false
+          : index === 0,
+      sortOrder: Number(
+        typeof image === "object"
+          ? image?.sortOrder ?? image?.sort_order ?? index
+          : index,
+      ),
       isNew: false,
     }))
     .filter((image) => image.imageUrl);
 
-  const uniqueImages = normalizedImages.filter(
-    (image, index, list) => list.findIndex((item) => item.imageUrl === image.imageUrl) === index,
-  );
+  return normalizedImages.sort((a, b) => {
+    if (a.isPrimary !== b.isPrimary) {
+      return a.isPrimary ? -1 : 1;
+    }
 
-  return uniqueImages.sort((first, second) => {
-    if (first.isPrimary !== second.isPrimary) return first.isPrimary ? -1 : 1;
-    return Number(first.sortOrder || 0) - Number(second.sortOrder || 0);
+    return Number(a.sortOrder || 0) - Number(b.sortOrder || 0);
   });
 };
 
