@@ -117,3 +117,31 @@ export const sortProductList = (items, sort) => {
 
   return sortedItems;
 };
+
+export const getProductImages = (product) => {
+  if (!product) return [];
+
+  if (Array.isArray(product.images)) {
+    return product.images;
+  }
+
+  return [];
+};
+
+export const getProductThumbnail = (product) => {
+  if (!product) return "";
+
+  // API Summary
+  if (product.primaryImageUrl) {
+    return product.primaryImageUrl;
+  }
+
+  // API Response
+  const images = getProductImages(product);
+
+  return (
+    images.find((img) => img.isPrimary)?.imageUrl ||
+    images[0]?.imageUrl ||
+    ""
+  );
+};
