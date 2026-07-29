@@ -1,11 +1,11 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import notificationApi from "../../../api/notificationApi";
 import { AuthContext } from "../../../context/authContextValue";
 import useNotificationSocket from "../../../hooks/useNotificationSocket";
 import styles from "./NotificationDropdown.module.css";
 
-const ORDER_TYPES = new Set(["ORDER_STATUS_UPDATED", "ORDER_CANCELLED", "ORDER_DELIVERED", "NEW_ORDER"]);
+// const ORDER_TYPES = new Set(["ORDER_STATUS_UPDATED", "ORDER_CANCELLED", "ORDER_DELIVERED", "NEW_ORDER"]);
 const ORDER_STATUS_LABELS = {
   PENDING: "Chờ xác nhận",
   CONFIRMED: "Đã xác nhận",
@@ -34,6 +34,7 @@ const formatTime = (value) => {
 
 export default function NotificationDropdown({ isAuthenticated, className = "", iconClassName = "" }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const wrapperRef = useRef(null);
   const { user } = useContext(AuthContext); // cần user.email để kết nối đúng kênh WebSocket riêng
   const [isOpen, setIsOpen] = useState(false);
@@ -125,23 +126,89 @@ export default function NotificationDropdown({ isAuthenticated, className = "", 
   };
 
   const handleNotificationClick = async (notification) => {
-    if (!notification?.isRead) {
+    if (!notification) return;
+
+    // Đánh dấu đã đọc
+    if (!notification.isRead) {
       try {
         await notificationApi.markAsRead(notification.id);
+
         setNotifications((items) =>
-          items.map((item) => (item.id === notification.id ? { ...item, isRead: true } : item)),
+          items.map((item) =>
+            item.id === notification.id
+              ? { ...item, isRead: true }
+              : item
+          )
         );
+
         setUnreadCount((count) => Math.max(0, count - 1));
       } catch {
-        // Keep the dropdown usable even if the read-state request fails.
+        // Vẫn cho phép chuyển trang nếu API đánh dấu đã đọc bị lỗi
       }
     }
 
     setIsOpen(false);
-    if (ORDER_TYPES.has(notification?.type)) {
-      navigate("/profile");
-    } else {
-      navigate("/profile");
+
+    const isAdminPage = location.pathname.startsWith("/admin");
+
+    switch (notification.type) {
+      // =========================
+      // SẢN PHẨM
+      // =========================
+      case "NEW_PRODUCT":
+        if (notification.relatedId) {
+          navigate(`/products/${notification.relatedId}`);
+        } else {
+          navigate("/products");
+        }
+        break;
+
+      // =========================
+      // KHUYẾN MÃI
+      // =========================
+      case "PROMOTION":
+        navigate("/vouchers");
+        break;
+
+      // =========================
+      // ĐƠN HÀNG
+      // =========================
+      case "NEW_ORDER":
+      case "ORDER_STATUS_UPDATED":
+      case "ORDER_CANCELLED":
+      case "ORDER_DELIVERED":
+        if (isAdminPage) {
+          navigate("/admin/orders", {
+            state: {
+              orderId: notification.relatedId,
+            },
+          });
+        } else {
+          navigate("/profile", {
+            state: {
+              section: "orders",
+              orderId: notification.relatedId,
+            },
+          });
+        }
+        break;
+
+      // =========================
+      // TÀI KHOẢN
+      // =========================
+      case "PROFILE_UPDATED":
+      case "PASSWORD_CHANGED":
+      case "ACCOUNT_STATUS_UPDATED":
+      case "ACCOUNT_ROLE_UPDATED":
+        navigate("/profile");
+        break;
+
+      // =========================
+      // MẶC ĐỊNH
+      // =========================
+      default:
+        navigate("/profile");
+        break;
     }
   };
 
