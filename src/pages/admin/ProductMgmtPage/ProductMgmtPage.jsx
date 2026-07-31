@@ -58,30 +58,6 @@ const generateSlug = (name) =>
     .trim()
     .replace(/\s+/g, "-");
 
-    const normalizeSkuPart = (value = "") =>
-  value
-    .trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D")
-    .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-const getSkuPreview = (productId, size, color) => {
-  if (!size?.trim() || !color?.trim()) {
-    return "Chọn size và nhập màu sắc";
-  }
-
-  if (!productId) {
-    return `AUTO-${normalizeSkuPart(size)}-${normalizeSkuPart(color)}`;
-  }
-
-  const productCode = `SP${String(productId).padStart(6, "0")}`;
-
-  return `${productCode}-${normalizeSkuPart(size)}-${normalizeSkuPart(color)}`;
-};
 
 const fetchProductVariants = async (product) => {
   const productId = getId(product);
@@ -206,15 +182,22 @@ const loadProductImages = async (productId) => getProductImages({ images: getLis
 const getVariantSalePrice = (variant) => variant?.salePrice ?? variant?.sale_price ?? "";
 
 const buildVariantForm = (variant) => ({
-  id: getId(variant),
-  tempId: variant?.tempId,
-  isNew: Boolean(variant?.isNew),
-  size: variant?.size || "",
-  color: variant?.color || "",
-  price: variant?.price ?? "",
-  salePrice: getVariantSalePrice(variant),
-  stockQuantity: variant?.stockQuantity ?? variant?.stock_quantity ?? variant?.stock ?? 0,
-  isActive: getActiveValue(variant),
+    id: getId(variant),
+    tempId: variant?.tempId,
+    isNew: Boolean(variant?.isNew),
+
+    sku: variant?.sku || "",
+
+    size: variant?.size || "",
+    color: variant?.color || "",
+    price: variant?.price ?? "",
+    salePrice: getVariantSalePrice(variant),
+    stockQuantity:
+        variant?.stockQuantity ??
+        variant?.stock_quantity ??
+        variant?.stock ??
+        0,
+    isActive: getActiveValue(variant),
 });
 
 const buildProductForm = (product, categories = []) => ({
@@ -746,6 +729,7 @@ export default function ProductMgmtPage() {
               <thead>
                 <tr>
                   <th>Ảnh</th>
+                  <th>Mã SP</th>
                   <th>Tên sản phẩm</th>
                   <th>Danh mục</th>
                   <th>Giá</th>
@@ -779,6 +763,7 @@ export default function ProductMgmtPage() {
                           </div>
                         )}
                       </td>
+                      <td>{product.productCode}</td>
                       <td className={styles.nameCell}>{product.name}</td>
                       <td>{safeText(product.categoryName || product.category?.name)}</td>
                       <td>{getProductDisplayPrice(product)}</td>
@@ -1020,11 +1005,7 @@ export default function ProductMgmtPage() {
                     <span>SKU tự động</span>
 
                     <input
-                      value={getSkuPreview(
-                        getId(editingProduct),
-                        newVariant.size,
-                        newVariant.color
-                      )}
+                      value="SKU sẽ được tạo sau khi lưu"
                       readOnly
                       aria-readonly="true"
                     />
@@ -1104,14 +1085,10 @@ export default function ProductMgmtPage() {
                       </label>
 
                       <label className={styles.compactField}>
-                        <span>SKU tự động</span>
+                        <span>SKU</span>
 
                         <input
-                          value={getSkuPreview(
-                            getId(editingProduct),
-                            variant.size,
-                            variant.color
-                          )}
+                          value={variant.sku || "SKU sẽ được tạo sau khi lưu"}
                           readOnly
                           aria-readonly="true"
                         />
