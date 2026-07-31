@@ -21,7 +21,6 @@ const initialForm = {
 const initialVariant = {
   size: "",
   color: "",
-  sku: "",
   price: "",
   salePrice: "",
   stockQuantity: 0,
@@ -58,6 +57,31 @@ const generateSlug = (name) =>
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-");
+
+    const normalizeSkuPart = (value = "") =>
+  value
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const getSkuPreview = (productId, size, color) => {
+  if (!size?.trim() || !color?.trim()) {
+    return "Chọn size và nhập màu sắc";
+  }
+
+  if (!productId) {
+    return `AUTO-${normalizeSkuPart(size)}-${normalizeSkuPart(color)}`;
+  }
+
+  const productCode = `SP${String(productId).padStart(6, "0")}`;
+
+  return `${productCode}-${normalizeSkuPart(size)}-${normalizeSkuPart(color)}`;
+};
 
 const fetchProductVariants = async (product) => {
   const productId = getId(product);
@@ -187,7 +211,6 @@ const buildVariantForm = (variant) => ({
   isNew: Boolean(variant?.isNew),
   size: variant?.size || "",
   color: variant?.color || "",
-  sku: variant?.sku || "",
   price: variant?.price ?? "",
   salePrice: getVariantSalePrice(variant),
   stockQuantity: variant?.stockQuantity ?? variant?.stock_quantity ?? variant?.stock ?? 0,
@@ -221,22 +244,48 @@ const buildVariantPayload = (variant) => ({
   size: variant.size.trim(),
   color: variant.color.trim(),
   price: Number(variant.price || 0),
-  salePrice: variant.salePrice === "" ? null : Number(variant.salePrice),
+  salePrice:
+    variant.salePrice === ""
+      ? null
+      : Number(variant.salePrice),
   stockQuantity: Number(variant.stockQuantity || 0),
-  sku: variant.sku.trim(),
   isActive: variant.isActive ?? true,
 });
 
 const validateVariant = (variant, sizeOptions = []) => {
-  if (!variant.size.trim()) return "Vui lòng nhập size.";
-  if (sizeOptions.length > 0 && !sizeOptions.includes(variant.size.trim())) {
+  if (!variant.size.trim()) {
+    return "Vui lòng chọn size.";
+  }
+
+  if (
+    sizeOptions.length > 0 &&
+    !sizeOptions.includes(variant.size)
+  ) {
     return "Size không thuộc hệ size đã chọn.";
   }
-  if (!variant.color.trim()) return "Vui lòng nhập màu sắc.";
-  if (!variant.sku.trim()) return "Vui lòng nhập SKU.";
-  if (variant.price === "" || Number(variant.price) <= 0) return "Giá bán phải lớn hơn 0.";
-  if (variant.salePrice !== "" && Number(variant.salePrice) < 0) return "Giá sale không được âm.";
-  if (Number(variant.stockQuantity) < 0) return "Tồn kho không được âm.";
+
+  if (!variant.color.trim()) {
+    return "Vui lòng nhập màu sắc.";
+  }
+
+  if (
+    variant.price === "" ||
+    Number(variant.price) <= 0
+  ) {
+    return "Giá bán phải lớn hơn 0.";
+  }
+
+  if (
+    variant.salePrice !== "" &&
+    Number(variant.salePrice) < 0
+  ) {
+    return "Giá sale không được âm.";
+  }
+
+  if (Number(variant.stockQuantity) < 0) {
+    return "Tồn kho không được âm.";
+  }
+
   return "";
 };
 
@@ -612,18 +661,21 @@ export default function ProductMgmtPage() {
         const createdProductId = getId(createdProduct);
         if (!createdProductId) throw new Error("Backend không trả về mã sản phẩm vừa tạo.");
 
-        await Promise.all(
-          form.variants.map((variant) => productApi.addVariant(createdProductId, buildVariantPayload(variant))),
-        );
+        for (const variant of form.variants) {
+          await productApi.addVariant(
+            createdProductId,
+            buildVariantPayload(variant)
+          );
+        }
         await syncProductImages(createdProductId, form);
       } else {
         const productId = getId(editingProduct);
         const existingVariants = form.variants.filter((variant) => variant.id);
 
         await productApi.update(productId, buildProductPayload(form));
-        await Promise.all(
-          existingVariants.map((variant) => productApi.updateVariant(variant.id, buildVariantPayload(variant))),
-        );
+        for (const variant of existingVariants) {
+          await productApi.updateVariant(variant.id, buildVariantPayload(variant));
+        }
         await syncProductImages(productId, form);
       }
 
@@ -965,11 +1017,16 @@ export default function ProductMgmtPage() {
                     />
                   </label>
                   <label className={styles.compactField}>
-                    <span>SKU</span>
+                    <span>SKU tự động</span>
+
                     <input
-                      value={newVariant.sku}
-                      onChange={(event) => updateNewVariant("sku", event.target.value)}
-                      placeholder="SP001-M-DEN"
+                      value={getSkuPreview(
+                        getId(editingProduct),
+                        newVariant.size,
+                        newVariant.color
+                      )}
+                      readOnly
+                      aria-readonly="true"
                     />
                   </label>
                   <label className={styles.compactField}>
@@ -1047,17 +1104,26 @@ export default function ProductMgmtPage() {
                       </label>
 
                       <label className={styles.compactField}>
-                        <span>SKU</span>
+                        <span>SKU tự động</span>
+
                         <input
-                          value={variant.sku}
-                          onChange={(event) => updateVariantForm(variantKey, "sku", event.target.value)}
+                          value={getSkuPreview(
+                            getId(editingProduct),
+                            variant.size,
+                            variant.color
+                          )}
+                          readOnly
+                          aria-readonly="true"
                         />
                       </label>
 
-                      <div className={styles.variantMeta}>
-                        <strong>{[variant.size, variant.color].filter(Boolean).join(" / ") || "Biến thể"}</strong>
-                        <span>{variant.sku || "Chưa có SKU"}</span>
-                      </div>
+                      {/* <div className={styles.variantMeta}>
+                        <strong>
+                          {[variant.size, variant.color]
+                            .filter(Boolean)
+                            .join(" / ") || "Biến thể"}
+                        </strong>
+                      </div> */}
 
                       <label className={styles.compactField}>
                         <span>Giá bán</span>
