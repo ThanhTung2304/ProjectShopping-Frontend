@@ -2,14 +2,32 @@ import axiosClient from "./axiosClient";
 
 const getResponseList = (response) => {
   if (Array.isArray(response)) return response;
-  if (Array.isArray(response?.data)) return response.data;
-  if (Array.isArray(response?.data?.content)) return response.data.content;
-  if (Array.isArray(response?.content)) return response.content;
+
+  if (Array.isArray(response?.data?.data?.content))
+    return response.data.data.content;
+
+  if (Array.isArray(response?.data?.content))
+    return response.data.content;
+
+  if (Array.isArray(response?.data))
+    return response.data;
+
+  if (Array.isArray(response?.content))
+    return response.content;
+
   return [];
 };
 
 const getTotalPages = (response) =>
-  Number(response?.totalPages ?? response?.data?.totalPages ?? response?.page?.totalPages ?? response?.data?.page?.totalPages ?? 1);
+  Number(
+    response?.totalPages ??
+    response?.data?.totalPages ??
+    response?.page?.totalPages ??
+    response?.data?.page?.totalPages ??
+    response?.data?.data?.page?.totalPages ??
+    response?.data?.data?.totalPages ??
+    1
+  );
 
 const getProductKey = (product) => product?.id || product?._id || product?.slug || product?.name;
 

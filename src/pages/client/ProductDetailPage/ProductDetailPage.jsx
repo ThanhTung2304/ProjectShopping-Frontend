@@ -26,7 +26,8 @@ const normalizeList = (value) => {
   if (Array.isArray(value)) return value.filter(Boolean);
   if (Array.isArray(value?.content)) return value.content.filter(Boolean);
   if (Array.isArray(value?.data)) return value.data.filter(Boolean);
-  if (Array.isArray(value?.data?.content)) return value.data.content.filter(Boolean);
+  if (Array.isArray(value?.data?.data?.content)) return value.data.data.content;
+  if (Array.isArray(value?.data?.content)) return value.data.content;
   if (typeof value === "string") {
     return value.split(",").map((item) => item.trim()).filter(Boolean);
   }
@@ -104,50 +105,7 @@ const findProductInList = (products, id) =>
     return keys.includes(String(id));
   });
 
-const getTotalPages = (response) =>
-  Number(
-    response?.totalPages ??
-      response?.data?.totalPages ??
-      response?.page?.totalPages ??
-      response?.data?.page?.totalPages ??
-      1,
-  );
 
-const uniqueProductsByKey = (products) => {
-  const seenKeys = new Set();
-
-  return products.filter((product) => {
-    const key = String(getProductId(product) || product?.slug || product?.name || "");
-    if (!key || seenKeys.has(key)) return false;
-    seenKeys.add(key);
-    return true;
-  });
-};
-
-const fetchAllProducts = async () => {
-  const defaultResponse = await productApi.getAll();
-  const defaultProducts = getResponseList(defaultResponse);
-
-  try {
-    const firstResponse = await productApi.getAll({ page: 0, size: 100 });
-    const firstProducts = getResponseList(firstResponse);
-    const totalPages = getTotalPages(firstResponse);
-
-    if (totalPages <= 1) return uniqueProductsByKey(defaultProducts.concat(firstProducts));
-
-    const pageResponses = await Promise.all(
-      Array.from({ length: totalPages - 1 }, (_, index) => productApi.getAll({ page: index + 1, size: 100 })),
-    );
-    const pagedProducts = pageResponses.reduce(
-      (products, response) => products.concat(getResponseList(response)),
-      firstProducts,
-    );
-
-    return uniqueProductsByKey(defaultProducts.concat(pagedProducts));
-  } catch {
-    return defaultProducts;
-  }
-};
 
 const getRelatedProducts = (products, currentProduct) => {
   const currentKeys = [currentProduct?.id, currentProduct?._id, currentProduct?.slug].filter(Boolean).map(String);
@@ -240,7 +198,11 @@ export default function ProductDetailPage() {
       setRelatedProducts([]);
 
       try {
-        const allProducts = await fetchAllProducts();
+        const allProducts = await productApi.getAllPages();
+
+        console.log("Tổng số sản phẩm:", allProducts.length);
+        console.log(allProducts);
+
         const listProduct = findProductInList(allProducts, id);
         let data = listProduct;
 
